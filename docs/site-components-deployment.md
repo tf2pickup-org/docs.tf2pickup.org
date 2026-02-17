@@ -557,7 +557,7 @@ volumes:
 
 ## `docker-compose.yml` for gameservers only
 
-Feel free to remove reduntant gameservers from the file if there are more than you actually need.
+Feel free to remove redundant gameservers from the file if there are more than you actually need.
 
 ```docker
 services:

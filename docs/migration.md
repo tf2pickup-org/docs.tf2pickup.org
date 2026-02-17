@@ -129,6 +129,10 @@ https://tf2pickup.eu/twitch/auth/return
 
 ## Version 10
 
+:::info
+The sections below describe migrating from older v3 versions (v9 → v10). If you are already on version 4, you can skip this entire section.
+:::
+
 ### Website name
 
 We introduced a new environment variable, `WEBSITE_NAME`. It identifies your _tf2pickup.org_ instance uniquely; for now, it will be used by the new [logs.tf](https://logs.tf/) uploader, but more use-cases are surely coming.

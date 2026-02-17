@@ -72,7 +72,7 @@ When the value is set for 0, no rejoin gameserver timeout time is being checked.
 
 ### Execution of extra commands
 
-Lets server administrator set extra CVars which are executed upon configuration file execution given for a map being run on the gameserver, one CVar per line. Leaving it empty means no extra configuration for the gameserver.
+Allows the server administrator to set extra CVars which are executed upon configuration file execution given for a map being run on the game server, one CVar per line. Leaving it empty means no extra configuration for the game server.
 
 ### Logs.tf upload method
 
@@ -137,7 +137,7 @@ This menu (formerly called "Edit configuration") lets super-users change setting
 
 ### Changing ban cooldown levels
 
-Lets specify the amount of cooldown levels as well as the ban length in miliseconds. Should be provided in JSON format in one line. Default settings are:
+Allows specifying the amount of cooldown levels as well as the ban length in milliseconds. Should be provided in JSON format in one line. Default settings are:
 
 ```json
 [
@@ -182,7 +182,7 @@ By default, after map is being picked to a next pickup game, it is excluded for 
 Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
 
-Defines time in miliseconds (default: `60000``) default value: given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
+Defines time in milliseconds (default: `60000`) given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
 
 ### Setting up ready up timeout
 
@@ -190,9 +190,13 @@ Defines time in miliseconds (default: `60000``) default value: given for all pla
 Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
 
-Defines time in miliseconds (default: `40000`). After the ready up mode is canceled due to insufficient amount of people in the queue, this value defines a time during which all players who have been in the queue during last ready-up mode will be readied up automatically. Should be provided as an integer.
+Defines time in milliseconds (default: `40000`). After the ready up mode is canceled due to insufficient amount of people in the queue, this value defines a time during which all players who have been in the queue during last ready-up mode will be readied up automatically. Should be provided as an integer.
 
 ### Excluding specific serveme.tf gameservers
+
+:::tip
+This setting is also available in the [Game Servers](/docs/final-touches#servemetf-integration-settings) admin panel under **Banned game server name patterns**.
+:::
 
 If defined, when the application reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
 

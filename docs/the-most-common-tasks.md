@@ -28,7 +28,7 @@ After that, a new server will reconfigure and people will be able to connect to 
 
 ## Reinitializing games
 
-Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the pickup server will try to reinitialize the game on the same game server.
+Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the application will try to reinitialize the game on the same game server.
 
 In cases like this just click the `Reinitialize game server` button.
 
