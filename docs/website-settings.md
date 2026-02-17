@@ -200,46 +200,18 @@ If defined, when the application reserves a serveme.tf server, it will not pick 
 
 This setting lets the super-user modify a promoted stream list apart from streams of all players who have integrated their accounts with Twitch. Options should be provided as an array. Default value: `[  "teamfortresstv",  "teamfortresstv2",  "teamfortresstv3",  "kritzkast",  "kritzkast2",  "rglgg",  "essentialstf",  "cappingtv",  "cappingtv2",  "cappingtv3",  "tflivetv"]`
 
-## Force create a player account
+## Bypass registration restrictions
 
-This lets you force create accounts, omitting registration requirements which are:
+Players who do not meet the registration requirements (such as having a public Steam profile, an ETF2L profile, or a minimum number of TF2 hours) will see an error when they try to log in. To allow such a player to register anyway, you can add their Steam ID to the bypass list.
 
-- having a public profile with public game progress, just like here:
+Go to the admin panel and choose `Bypass restrictions`. Enter the player's SteamID64 (for instance `76561198011558250`) and click `Add user Steam ID`.
 
-![public-game-details](/img/content/website-settings/public-game-details.png)
+![bypass-registration-restrictions](/img/content/website-settings/bypass-registration-restrictions.png)
 
-In case a player won't have the game details public, an error will show up after the first log-in:
-
-![error-tf2-private-details](/img/content/website-settings/error-tf2-private-details.png)
-
-- having an ETF2L profile ([like this](https://etf2l.org/forum/user/48288/)),
-
-If the player doesn't have an ETF2L profile registered then an error will show up after the first log-in.:
-
-![error-tf2-insufficient-tf2-game-hours](/img/content/website-settings/error-tf2-insufficient-tf2-game-hours.png)
-
-- having more than 500 hours in the Team Fortress 2:
-
-![tf2-in-game-hours](/img/content/website-settings/tf2-in-game-hours.png)
-
-In case a player won't have the sufficient amount of hours spent in the Team Fortress 2, an error will show up after the first log-in:
-
-![error-tf2-insufficient-tf2-game-hours](/img/content/website-settings/error-tf2-insufficient-tf2-game-hours.png)
-
-All you need to do is to enter a player nickname and SteamID64 format value, for instance `76561198011558250`.
-
-![force-create-user-account](/img/content/website-settings/force-create-user-account.png)
-
-When the profile is created, it will be completely empty like on this screenshot below:
-
-![force-created-profile](/img/content/website-settings/force-created-profile.png)
-
-All user data will be filled up once the user for which an account was force created will log-in to the site.
+Once their Steam ID is on the bypass list, the player can log in normally through Steam — the registration restrictions will be skipped for them. Their profile will be created automatically when they log in for the first time.
 
 :::tip
-
-If a player comes in an issue where they cannot log in due to the errors shown above, let them know that they should wait a bit before they attempt to log in again, because otherwise they will end up with the same error for a short period of time.
-
+If a player had a failed login attempt due to registration restrictions, let them know to wait a moment before trying again, because the error may persist briefly.
 :::
 
 ## Setting up player skills

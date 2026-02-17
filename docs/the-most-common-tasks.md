@@ -78,39 +78,21 @@ If you won't assign skill for a player - they will get skill values defined in a
 
 ### Assigning skills to a player
 
-In order to define skill for a certain player, go to a player page and click `edit`:
-
-![player-profile](/img/content/overview/player-profile.png)
-
-This is how skill definition looks like for a certain player on 6v6:
+When an admin views a player's profile, a skill editing toolbox is displayed directly on the page. It shows input fields for each game class, a win-loss chart, and a save button.
 
 ![set-skills-for-a-player](/img/content/common-tasks/set-skills-for-a-player.png)
 
-There you can see a skill definition view for Highlander (9v9):
-
-![set-skills-for-a-player-in-highlander](/img/content/common-tasks/set-skills-for-a-player-in-highlander.png)
+Adjust the values for each class and click `Save`. You can also click `Reset` to revert to the default skill values.
 
 ### Defining default skill values
 
-In order to define player skills, go to the admin panel and choose `Default player skill`.
+Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class, and save.
 
-![define-default-player-skill-values](/img/content/common-tasks/define-default-player-skill-values.png)
-
-Then, define values for classes available and save it.
-
-![set-default-player-skill](/img/content/common-tasks/set-default-player-skill.png)
-
-Here is how it looks like for Highlander site:
-
-![set-default-player-skill-for-highlander](/img/content/common-tasks/set-default-player-skill-for-highlander.png)
+![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
 ### Reviewing skill values
 
-If you want to review skill values for all users on the website, go to the admin panel and choose `Player skill table`.
-
-![open-player-skill-table](/img/content/common-tasks/open-player-skill-table.png)
-
-You can sort all columns (containing nicknames and skill values) ascending/descending, just by clicking on the column names.
+You can export all player skills as a CSV file from the admin panel under `Skill import/export`. This lets you review and edit skill values in a spreadsheet application.
 
 ![skill-table](/img/content/common-tasks/skill-table.png)
 
