@@ -118,7 +118,7 @@ If the last setting is enabled, any used with skill not defined manually by an a
 
 See [here](/docs/final-touches#set-up-voice-chat-settings).
 
-## Configuring advanced site settings
+## View for nerds
 
 :::warning
 Changing values through this interface is not supported. Change these settings only if you know what you're doing and if you change anything here, make sure you have made a database backup first.
@@ -126,7 +126,7 @@ Changing values through this interface is not supported. Change these settings o
 
 ![advanced-server-configuration](/img/content/website-settings/advanced-server-configuration.png)
 
-This menu lets super-users change settings, which are not yet implemented as sub-menu options as well as options available in other views. We will focus here on settings which are unavailable in other views:
+This menu (formerly called "Edit configuration") lets super-users change settings, which are not yet implemented as sub-menu options as well as options available in other views. We will focus here on settings which are unavailable in other views:
 
 - ban cooldown levels
 - map cooldown
