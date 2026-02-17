@@ -367,10 +367,20 @@ async function main() {
   await waitForPage(page)
   await screenshot(page, 'common-tasks', 'player-bans-menu.png')
 
-  // Add ban form
+  // Add ban form - duration mode (default)
   await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/bans/add`)
   await waitForPage(page)
-  await screenshot(page, 'common-tasks', 'add-player-ban.png')
+  await screenshot(page, 'common-tasks', 'ban-player-duration.png')
+
+  // Add ban form - end date mode
+  await page.click('#lengthSelectorEndDate')
+  await page.waitForTimeout(300)
+  await screenshot(page, 'common-tasks', 'ban-player-enddate.png')
+
+  // Add ban form - forever mode
+  await page.click('#lengthSelectorForever')
+  await page.waitForTimeout(300)
+  await screenshot(page, 'common-tasks', 'ban-player-forever.png')
 
   // Player edit profile (nickname, cooldown level)
   await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/profile`)
@@ -463,6 +473,32 @@ async function main() {
     await regPage.waitForSelector('dialog[title="Accept rules dialog"]', { timeout: 5000 })
     await regPage.waitForTimeout(500)
     await screenshot(regPage, 'final-touches', 'accept-site-rules.png')
+    await ctx.close()
+  }
+
+  // ─── Ban from player perspective ──────────────────────────────
+  console.log('\n📸 Ban from player perspective...')
+  // Accept rules for NewPlayer first so the ban banner is visible
+  mongosh(`db.players.updateOne({ steamId: "${NEW_PLAYER.steamId}" }, { $set: { hasAcceptedRules: true } })`)
+  // Ban the new player via the admin form
+  {
+    await page.goto(BASE_URL + `/players/${NEW_PLAYER.steamId}/edit/bans/add`)
+    await waitForPage(page)
+    // Select "forever" and fill in a reason
+    await page.click('#lengthSelectorForever')
+    await page.fill('#banReason', 'Breaking site rules')
+    await page.click('button[type="submit"]')
+    await waitForPage(page)
+    console.log('  ✓ Banned NewPlayer')
+
+    // Now log in as the banned player and see the ban notice
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const bannedPage = await ctx.newPage()
+    await loginAs(bannedPage, NEW_PLAYER.steamId)
+    await bannedPage.goto(BASE_URL + '/')
+    await waitForPage(bannedPage)
+    await bannedPage.waitForTimeout(500)
+    await screenshot(bannedPage, 'common-tasks', 'ban-from-player-perspective.png')
     await ctx.close()
   }
 
