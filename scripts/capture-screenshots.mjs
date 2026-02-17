@@ -53,6 +53,25 @@ const FAKE_PLAYERS = [
   { steamId: '76561199195188363', name: 'BellBoy', avatar: 'b4771bbe7d200006dcc1554414d07c4d91e88e04' },
 ]
 
+// Game number for the fake in-progress game (well above the highest existing game)
+const FAKE_GAME_NUMBER = 99999
+
+// 6v6 game slot layout for the fake game (all 12 players assigned to teams)
+const GAME_SLOTS = [
+  { id: 'red-scout-1',   player: 0,  team: 'red', gameClass: 'scout' },
+  { id: 'red-scout-2',   player: 1,  team: 'red', gameClass: 'scout' },
+  { id: 'red-soldier-1', player: 2,  team: 'red', gameClass: 'soldier' },
+  { id: 'red-soldier-2', player: 3,  team: 'red', gameClass: 'soldier' },
+  { id: 'red-demoman-1', player: 4,  team: 'red', gameClass: 'demoman' },
+  { id: 'red-medic-1',   player: 5,  team: 'red', gameClass: 'medic' },
+  { id: 'blu-scout-1',   player: 6,  team: 'blu', gameClass: 'scout' },
+  { id: 'blu-scout-2',   player: 7,  team: 'blu', gameClass: 'scout' },
+  { id: 'blu-soldier-1', player: 8,  team: 'blu', gameClass: 'soldier' },
+  { id: 'blu-soldier-2', player: 9,  team: 'blu', gameClass: 'soldier' },
+  { id: 'blu-demoman-1', player: 10, team: 'blu', gameClass: 'demoman' },
+  { id: 'blu-medic-1',   player: 11, team: 'blu', gameClass: 'medic' },
+]
+
 // 6v6 slot assignments for the fake players (not all slots filled to avoid
 // triggering the ready-up phase)
 const SLOT_ASSIGNMENTS = [
@@ -180,8 +199,140 @@ function cleanupNewPlayer() {
   mongosh(`db.players.deleteOne({ steamId: "${NEW_PLAYER.steamId}" })`)
 }
 
+function insertFakeGame() {
+  console.log('\n🎮 Inserting fake in-progress game into database...')
+  const now = new Date().toISOString()
+  const slotsJson = JSON.stringify(
+    GAME_SLOTS.map(s => ({
+      id: s.id,
+      player: FAKE_PLAYERS[s.player].steamId,
+      team: s.team,
+      gameClass: s.gameClass,
+      status: 'active',
+      connectionStatus: 'connected',
+      skill: 5 + Math.floor(Math.random() * 10),
+    })),
+  )
+  mongosh(`
+    db.games.insertOne({
+      number: ${FAKE_GAME_NUMBER},
+      map: "cp_process_final",
+      state: "started",
+      slots: ${slotsJson},
+      events: [
+        { event: "created", at: new Date("${now}") },
+        { event: "game server assigned", at: new Date("${now}"), gameServerName: "tf2pickup.org #1" },
+        { event: "game server initialized", at: new Date("${now}") },
+        { event: "started", at: new Date("${now}") },
+      ],
+      gameServer: {
+        id: "fake-server-1",
+        provider: "static",
+        name: "tf2pickup.org #1",
+        address: "45.33.22.11",
+        port: "27015",
+        rcon: { address: "45.33.22.11", port: "27015", password: "secret" }
+      },
+      connectString: "connect 45.33.22.11:27015; password pickup123",
+      stvConnectString: "connect 45.33.22.11:27020",
+      score: { blu: 2, red: 1 },
+    })
+  `)
+  // Set activeGame on all fake players so they see the connect button
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $set: { activeGame: ${FAKE_GAME_NUMBER} } })`)
+  // Insert a dummy online static game server for the reassign dialog
+  mongosh(`
+    db.staticgameservers.insertOne({
+      name: "tf2pickup.org #3",
+      address: "45.33.22.12",
+      port: "27015",
+      rconPassword: "secret",
+      isOnline: true,
+      priority: 1,
+      createdAt: new Date()
+    })
+  `)
+  console.log(`  ✓ Game #${FAKE_GAME_NUMBER} inserted (started, score 2:1)`)
+}
+
+function requestSubstitute(slotId, steamId, gameClass, team) {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER}, "slots.id": "${slotId}" },
+      { $set: { "slots.$.status": "waiting for substitute" },
+        $push: { events: {
+          event: "substitute requested",
+          at: new Date(),
+          player: "${steamId}",
+          gameClass: "${gameClass}",
+          actor: "${SUPER_USER}"
+        }}
+      }
+    )
+  `)
+  // Insert into the substitute requests collection for the queue page notification
+  mongosh(`
+    db['games.substituterequests'].insertOne({
+      gameNumber: ${FAKE_GAME_NUMBER},
+      slotId: "${slotId}",
+      team: "${team}",
+      gameClass: "${gameClass}"
+    })
+  `)
+}
+
+function replacePlayer(slotId, replacementSteamId) {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER}, "slots.id": "${slotId}" },
+      { $set: {
+        "slots.$.player": "${replacementSteamId}",
+        "slots.$.status": "active",
+        "slots.$.connectionStatus": "connected"
+      },
+        $push: { events: {
+          event: "player replaced",
+          at: new Date(),
+          replacee: "76561199195756652",
+          replacement: "${replacementSteamId}",
+          gameClass: "scout"
+        }}
+      }
+    )
+  `)
+  mongosh(`db['games.substituterequests'].deleteOne({ gameNumber: ${FAKE_GAME_NUMBER}, slotId: "${slotId}" })`)
+}
+
+function forceEndGame() {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER} },
+      { $set: { state: "interrupted", connectString: null, stvConnectString: null },
+        $push: { events: {
+          event: "ended",
+          at: new Date(),
+          reason: "interrupted",
+          actor: "${SUPER_USER}"
+        }}
+      }
+    )
+  `)
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $unset: { activeGame: 1 } })`)
+}
+
+function cleanupFakeGame() {
+  mongosh(`db.games.deleteOne({ number: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db['games.substituterequests'].deleteMany({ gameNumber: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db.staticgameservers.deleteOne({ name: "tf2pickup.org #3" })`)
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $unset: { activeGame: 1 } })`)
+}
+
 function cleanupFakePlayers() {
-  console.log('\n🧹 Cleaning up fake players from database...')
+  console.log('\n🧹 Cleaning up fake players and game from database...')
+  cleanupFakeGame()
   const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
   mongosh(`db.players.deleteMany({ steamId: { $in: [${steamIds}] } })`)
   cleanupNewPlayer()
@@ -282,6 +433,117 @@ async function main() {
   // Drain the queue before taking other screenshots
   await drainQueue(queueContexts)
 
+  // ─── Active game screenshots ──────────────────────────────────
+  console.log('\n📸 Active game screenshots...')
+  insertFakeGame()
+  const gameUrl = `${BASE_URL}/games/${FAKE_GAME_NUMBER}`
+
+  // Game page as admin (shows reinitialize, reassign, force-end buttons + request substitute)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const adminPage = await ctx.newPage()
+    await loginAs(adminPage, SUPER_USER)
+    await adminPage.goto(gameUrl)
+    await waitForPage(adminPage)
+    await screenshot(adminPage, 'common-tasks', 'pickup-start.png')
+    // The request substitute button is visible next to each player slot
+    await screenshot(adminPage, 'common-tasks', 'request-substitute-button.png')
+    // The reinitialize button
+    await screenshot(adminPage, 'common-tasks', 'reinitializing-the-game.png')
+
+    // Open the reassign game server dialog
+    await adminPage.click(`#game-${FAKE_GAME_NUMBER}-reassign-game-server-button`)
+    await adminPage.waitForSelector('#choose-game-server-dialog[open]', { timeout: 5000 })
+    await adminPage.waitForTimeout(1500) // wait for serveme.tf servers to load
+    await screenshot(adminPage, 'common-tasks', 'reassign-server.png')
+    // Close the dialog
+    await adminPage.keyboard.press('Escape')
+    await adminPage.waitForTimeout(300)
+
+    await ctx.close()
+  }
+
+  // Game page as a participating player (shows connect string)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const playerPage = await ctx.newPage()
+    await loginAs(playerPage, FAKE_PLAYERS[0].steamId)
+    await playerPage.goto(gameUrl)
+    await waitForPage(playerPage)
+    await screenshot(playerPage, 'overview', 'pickup-game-overview-as-a-player.png')
+    await ctx.close()
+  }
+
+  // Game page as a spectator (not logged in - shows STV connect string)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const spectatorPage = await ctx.newPage()
+    await spectatorPage.goto(gameUrl)
+    await waitForPage(spectatorPage)
+    await screenshot(spectatorPage, 'overview', 'pickup-game-overview-as-a-spectator.png')
+    await ctx.close()
+  }
+
+  // Request substitute flow
+  console.log('\n📸 Substitute flow screenshots...')
+  requestSubstitute('red-scout-1', FAKE_PLAYERS[0].steamId, 'scout', 'red')
+  console.log('  ✓ Substitute requested for red-scout-1')
+
+  // Substitute needed notification on the queue page
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const queuePage = await ctx.newPage()
+    await loginAs(queuePage, REGULAR_PLAYER)
+    await queuePage.goto(BASE_URL + '/')
+    await waitForPage(queuePage)
+    // Hide the notifications permission banner
+    await queuePage.evaluate(() => {
+      for (const id of ['notifications-permission-default', 'notifications-permission-denied']) {
+        const el = document.getElementById(id)
+        if (el) el.style.display = 'none'
+      }
+    })
+    await screenshot(queuePage, 'common-tasks', 'substitute-needed-notification.png')
+    await ctx.close()
+  }
+
+  // Game page with a free substitute spot (logged in as non-participant)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const subPage = await ctx.newPage()
+    await loginAs(subPage, REGULAR_PLAYER)
+    await subPage.goto(gameUrl)
+    await waitForPage(subPage)
+    await screenshot(subPage, 'common-tasks', 'request-substitute-free-spot.png')
+    await ctx.close()
+  }
+
+  // After sub joins: replace the player in the DB and capture
+  replacePlayer('red-scout-1', REGULAR_PLAYER)
+  console.log('  ✓ Player replaced in red-scout-1')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const afterSubPage = await ctx.newPage()
+    await loginAs(afterSubPage, REGULAR_PLAYER)
+    await afterSubPage.goto(gameUrl)
+    await waitForPage(afterSubPage)
+    await screenshot(afterSubPage, 'common-tasks', 'request-substitute-after-joining.png')
+    await ctx.close()
+  }
+
+  // Force-end the game and capture the ended state
+  console.log('\n📸 Ended game screenshot...')
+  forceEndGame()
+  console.log('  ✓ Game force-ended')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const endedPage = await ctx.newPage()
+    await endedPage.goto(gameUrl)
+    await waitForPage(endedPage)
+    await screenshot(endedPage, 'overview', 'pickup-game-overview-after-a-game.png')
+    await ctx.close()
+  }
+
   // ─── Overview screenshots (NOT logged in) ───────────────────────
   console.log('\n📸 Overview screenshots (public view)...')
   {
@@ -312,16 +574,6 @@ async function main() {
     await page.goto(BASE_URL + '/rules')
     await waitForPage(page)
     await screenshot(page, 'overview', 'rules-page.png')
-
-    // Game overview (public view, no admin buttons)
-    await page.goto(BASE_URL + '/games')
-    await waitForPage(page)
-    const gameLinks = await page.$$('a[href^="/games/"]')
-    if (gameLinks.length > 0) {
-      await gameLinks[0].click()
-      await waitForPage(page)
-      await screenshot(page, 'overview', 'pickup-game-overview-after-a-game.png')
-    }
 
     await ctx.close()
   }

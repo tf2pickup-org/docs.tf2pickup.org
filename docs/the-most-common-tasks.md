@@ -26,8 +26,6 @@ In case no static servers are available, game servers from serveme.tf will show 
 
 After that, a new server will reconfigure and people will be able to connect to it.
 
-![reassign-server](/img/content/common-tasks/after-server-reassignment.png)
-
 ## Reinitializing games
 
 Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the pickup server will try to reinitialize the game on the same pickup server.
