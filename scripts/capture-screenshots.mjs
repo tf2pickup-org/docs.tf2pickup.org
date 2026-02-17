@@ -30,6 +30,13 @@ const SUPER_USER = '76561198074409147'
 // A regular player (no admin roles) from the database for non-admin views
 const REGULAR_PLAYER = '76561198090785419'
 
+// A brand-new dummy player for registration flow screenshots (accept rules dialog, etc.)
+const NEW_PLAYER = {
+  steamId: '76561199999999999',
+  name: 'NewPlayer',
+  avatar: 'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb',
+}
+
 // Fake players to populate the queue (use avatars from real players in the dump)
 const FAKE_PLAYERS = [
   { steamId: '76561199195756652', name: 'Promenader', avatar: 'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb' },
@@ -140,10 +147,44 @@ function upsertFakePlayers() {
   }
 }
 
+function createNewPlayer() {
+  console.log('\n🗃️  Creating new player for registration flow...')
+  const p = NEW_PLAYER
+  const avatarBase = `https://avatars.steamstatic.com/${p.avatar}`
+  mongosh(`
+    db.players.updateOne(
+      { steamId: "${p.steamId}" },
+      { $set: {
+        name: "${p.name}",
+        joinedAt: new Date(),
+        avatar: {
+          small: "${avatarBase}.jpg",
+          medium: "${avatarBase}_medium.jpg",
+          large: "${avatarBase}_full.jpg"
+        },
+        roles: [],
+        hasAcceptedRules: false,
+        cooldownLevel: 0,
+        preferences: {},
+        stats: { totalGames: 0, gamesByClass: {} }
+      },
+      $unset: { activeGame: 1 }
+      },
+      { upsert: true }
+    )
+  `)
+  console.log(`  ✓ ${p.name} (${p.steamId}) with hasAcceptedRules: false`)
+}
+
+function cleanupNewPlayer() {
+  mongosh(`db.players.deleteOne({ steamId: "${NEW_PLAYER.steamId}" })`)
+}
+
 function cleanupFakePlayers() {
   console.log('\n🧹 Cleaning up fake players from database...')
   const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
   mongosh(`db.players.deleteMany({ steamId: { $in: [${steamIds}] } })`)
+  cleanupNewPlayer()
 }
 
 // ─── Queue population ───────────────────────────────────────────────
@@ -408,6 +449,22 @@ async function main() {
   await page.goto(BASE_URL + '/settings')
   await waitForPage(page)
   await screenshot(page, 'player-settings', 'player-settings.png')
+
+  // ─── Registration flow screenshots ─────────────────────────────
+  console.log('\n📸 Registration flow screenshots...')
+  createNewPlayer()
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const regPage = await ctx.newPage()
+    await loginAs(regPage, NEW_PLAYER.steamId)
+    await regPage.goto(BASE_URL + '/')
+    await waitForPage(regPage)
+    // Wait for the accept rules dialog to appear
+    await regPage.waitForSelector('dialog[title="Accept rules dialog"]', { timeout: 5000 })
+    await regPage.waitForTimeout(500)
+    await screenshot(regPage, 'final-touches', 'accept-site-rules.png')
+    await ctx.close()
+  }
 
   // ─── Cleanup ────────────────────────────────────────────────────
   await browser.close()

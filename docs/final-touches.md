@@ -12,11 +12,9 @@ We discourage you from using inline HTML formatting, since it's buggy.
 
 ![edit-rules](/img/content/final-touches/edit-rules.png)
 
-After setting up the rules, they will show up in a popup for every user joining the site for the very first time (right with Mumble requirement notification):
+After setting up the rules, they will show up in a popup for every user joining the site for the very first time:
 
-![edit-rules](/img/content/final-touches/i-have-mumble.png)
-
-![edit-rules](/img/content/final-touches/accept-site-rules.png)
+![accept-site-rules](/img/content/final-touches/accept-site-rules.png)
 
 ## Reviewing the privacy policy
 
@@ -50,13 +48,7 @@ The game server setup is being done automatically. After discovering newly setup
 
 ![game-servers-configuration](/img/content/final-touches/game-servers-configuration.png)
 
-If you have any static servers, they will show up on the list. You can click on any of them in order to see their address and to perform diagnostics. In order to do that, click the **Run diagnostics** button. The site will perform tests to ensure the game server works correctly.
-
-![game-server-details](/img/content/final-touches/game-server-details.png)
-
-There you can see the diagnostics status. In this case everything went smooth and things seem to be fine.
-
-![game-server-diagnostics](/img/content/final-touches/game-server-diagnostics.png)
+If you have any static servers, they will show up on the list.
 
 ### serveme.tf integration settings
 
