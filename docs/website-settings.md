@@ -13,7 +13,7 @@ Currently website settings lets you:
 - configure player restrictions,
 - configure voice server,
 - configure advanced site settings,
-- force create player account,
+- bypass registration restrictions,
 - import player skill,
 - show site player skill table,
 - scramble maps available to vote at the moment,

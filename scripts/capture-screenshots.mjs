@@ -754,6 +754,8 @@ async function main() {
   await page.goto(BASE_URL + '/admin/skill-import-export')
   await waitForPage(page)
   await screenshot(page, 'final-touches', 'import-players-skill.png')
+  // Same page also used for the skill table screenshot in common-tasks docs
+  await screenshot(page, 'common-tasks', 'skill-table.png')
 
   // Discord settings
   await page.goto(BASE_URL + '/admin/discord')
