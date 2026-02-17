@@ -201,6 +201,10 @@ function cleanupNewPlayer() {
 
 function insertFakeGame() {
   console.log('\n🎮 Inserting fake in-progress game into database...')
+  // Clean up any leftover from a previous failed run
+  mongosh(`db.games.deleteOne({ number: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db['games.substituterequests'].deleteMany({ gameNumber: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db.staticgameservers.deleteOne({ name: "tf2pickup.org #3" })`)
   const now = new Date().toISOString()
   const slotsJson = JSON.stringify(
     GAME_SLOTS.map(s => ({
@@ -537,6 +541,45 @@ async function main() {
     await ctx.close()
   }
 
+  // Game skill values GIF (skills hidden → skills shown toggle)
+  // Must be captured while the game is still in "started" state (admin toolbox visible)
+  console.log('\n📸 Game skill values GIF...')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const skillPage = await ctx.newPage()
+    await loginAs(skillPage, SUPER_USER)
+    await skillPage.goto(gameUrl)
+    await waitForPage(skillPage)
+
+    // Frame 1: skills hidden (default state)
+    const frame1 = imgPath('common-tasks', 'game-skill-values-frame1.png')
+    await skillPage.screenshot({ path: frame1, type: 'png' })
+
+    // Click the label wrapping the checkbox to toggle skill visibility
+    await skillPage.click('.show-assigned-skills-checkbox', { force: true })
+    await skillPage.waitForTimeout(500)
+
+    // Frame 2: skills shown
+    const frame2 = imgPath('common-tasks', 'game-skill-values-frame2.png')
+    await skillPage.screenshot({ path: frame2, type: 'png' })
+
+    // Combine into animated GIF (2 second delay between frames)
+    const gifPath = imgPath('common-tasks', 'game-skill-values.gif')
+    execFileSync('convert', [
+      '-delay', '200', frame1,
+      '-delay', '200', frame2,
+      '-loop', '0',
+      gifPath,
+    ])
+    // Clean up temporary frames
+    const { unlinkSync } = await import('fs')
+    unlinkSync(frame1)
+    unlinkSync(frame2)
+    console.log('  ✓ common-tasks/game-skill-values.gif')
+
+    await ctx.close()
+  }
+
   // End the game naturally and capture the ended state
   console.log('\n📸 Ended game screenshot...')
   endGameNaturally()
@@ -686,6 +729,16 @@ async function main() {
   await page.goto(BASE_URL + '/admin/game-servers')
   await waitForPage(page)
   await screenshot(page, 'final-touches', 'game-servers-configuration.png')
+
+  // serveme.tf integration section (element screenshot of the serveme.tf panel)
+  {
+    const servemeTfSection = page.locator('.admin-panel-set').last()
+    await servemeTfSection.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(300)
+    const servemeTfPath = imgPath('final-touches', 'configure-serveme-integration.png')
+    await servemeTfSection.screenshot({ path: servemeTfPath, type: 'png' })
+    console.log('  ✓ final-touches/configure-serveme-integration.png (element)')
+  }
 
   // Voice chat settings
   await page.goto(BASE_URL + '/admin/voice-server')

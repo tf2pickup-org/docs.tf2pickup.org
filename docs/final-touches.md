@@ -60,11 +60,10 @@ Provided you have a valid serveme.tf API key set in your `.env` file, _serveme.t
 
 ![configure-serveme-integration](/img/content/final-touches/configure-serveme-integration.png)
 
-Currently the only setting you can define at this point is the preferred region of the reserved servers.
+Here you can configure:
 
-![change-serveme-preference](/img/content/final-touches/change-serveme-preference.png)
-
-You can also exclude servers from being reserved by providing keywords you want to avoid. For that, check [here](/docs/website-settings#excluding-specific-servemetf-gameservers).
+- **Preferred region** — pick the region closest to your players. If a server from the preferred region is not available, another one will be used instead.
+- **Banned game server name patterns** — exclude servers whose names contain any of the listed patterns from being reserved.
 
 ## Add admins to the site, set up whitelist, maps and skills
 
