@@ -2,7 +2,7 @@
 title: Site components deployment
 ---
 
-In order to allow for a quick site setup, we make use of Docker containers. That lets us set up the website (client and server with its database), gameservers and optionally a Mumble server. In order to start looking into deploying your own tf2pickup.org instance, you have to have all files specified below. Examples are based on [tf2pickup.eu](https://tf2pickup.eu) website, domain and their Discord server.
+In order to allow for a quick site setup, we make use of Docker containers. That lets us set up the website with its database, gameservers and optionally a Mumble server. In order to start looking into deploying your own tf2pickup.org instance, you have to have all files specified below. Examples are based on [tf2pickup.eu](https://tf2pickup.eu) website, domain and their Discord server.
 
 ## Prerequisites
 
@@ -12,12 +12,11 @@ In order to allow for a quick site setup, we make use of Docker containers. That
   - [Debian 12](https://docs.docker.com/engine/install/debian/),
   - [Arch Linux](https://wiki.archlinux.org/title/docker#Installation),
 - prepare the following files in a separate folder, name it `tf2pickup-eu`, then place inside:
-  - `.env` - stores variables needed for setting client, server, database and mumble containers up
+  - `.env` - stores variables needed for setting the application, database and mumble containers up
   - `docker-compose.yml` - contains all container settings
-  - `redis.conf` - contains Redis configuration
   - `gameserver_1.env` - stores settings for the first game server _(optional)_
   - `gameserver_2.env` - stores settings for the second game server _(optional)_
-  - `gameserver_3.env` - stores settings for the second game server _(optional)_
+  - `gameserver_3.env` - stores settings for the third game server _(optional)_
   - `maps/` folder - it should contain all maps available for the game servers, `.bsp` extension _(optional)_,
   - `sourcetv1`, `sourcetv2`, `sourcetv3` folders - they will contain SourceTV demos from the pickup game servers _(optional)_,
   - `welcome_text.txt` - stores Message of the Day shown after joining Pickup Mumble server.
@@ -69,42 +68,28 @@ Then, these are the templates for the aforementioned files:
 ## `.env`
 
 ```env
-### Configuration for the Server
-
 # Timezone of the server
 # https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
 TZ=Europe/Warsaw
 
+NODE_ENV=production
+
+# Logging level
+# Possible values: fatal, error, warn, info, debug, trace
+LOG_LEVEL=info
+
+# An URL to where this instance will be accessed
+WEBSITE_URL=https://tf2pickup.eu
+
 # The name of the website
 WEBSITE_NAME=tf2pickup.eu
 
-# An URL to where this server instance will be accessed
-API_URL=https://api.tf2pickup.eu
-
-# An URL to where the client is hosted
-CLIENT_URL=https://tf2pickup.eu
-
-# The bot name
-BOT_NAME=${WEBSITE_NAME}
-
-# MongoDB
-# The commented values below are used for creating a database user and establishing a connection with it
-MONGODB_ROOT_USER=admin
-MONGODB_ROOT_PASSWORD=yoursuperfunnyrootpassword
-MONGODB_USERNAME=tf2pickup
-MONGODB_DATABASE=tf2pickup
-MONGODB_PASSWORD=yoursuperfunnypassword
-# MONGODB_URI syntax:
-# mongodb://username:password@hostname/database-name
+# MongoDB connect string
 MONGODB_URI=mongodb://tf2pickup:yoursuperfunnypassword@mongo/tf2pickup
-
-# Redis URL
-REDIS_PASSWORD=yoursuperfunnyredispassword
-REDIS_URL=redis://:yoursuperfunnyredispassword@redis:6379
 
 # logs.tf API key
 # Obtain yours here: https://logs.tf/uploader
-LOGS_TF_API_KEY=
+LOGS_TF_API_KEY=your_logs_tf_api_key
 
 # Used to authenticate and add servers to the serverlist.
 GAME_SERVER_SECRET=yoursuperfunnygameserversecret
@@ -113,24 +98,23 @@ GAME_SERVER_SECRET=yoursuperfunnygameserversecret
 # Get your key at https://steamcommunity.com/dev/apikey
 STEAM_API_KEY=1234567890ABCDEF1234567890ABCDEF
 
-# A passphrase that is used to encrypt the keystore file.
+# A passphrase that is used to encrypt private keys that sign JWT tokens.
 # NOTE: For production, get a random password (i.e. from https://passwordsgenerator.net/)
-# and do not change it afterwards. If you change the passphare all JWT tokens will no longer
-# be valid, so all clients will be logged out.
+# and do not change it afterwards.
 KEY_STORE_PASSPHRASE=XDXDXDXDXDXDXDXDXD
 
 # SteamID of the super-user
 # NOTE: Use the SteamID64 format.
 SUPER_USER=76561198011558250
 
-# Which gamemode to run; see src/configs/queue for different gamemodes, possible values: 6v6, 9v9, bball
+# Which gamemode to run; possible values: 6v6, 9v9, bball, ultiduo
 QUEUE_CONFIG=6v6
 
 # Log relay
 # The log relay uses one UDP port to receive logs from the TF2 game servers. These are used
 # to determine when the match starts, ends, when users connect, etc.
-# It should be the same address as API_URL, but without the https schema.
-LOG_RELAY_ADDRESS=api.tf2pickup.eu
+# It should be the public address of the server, including the port.
+LOG_RELAY_ADDRESS=tf2pickup.eu:3000
 LOG_RELAY_PORT=9871
 
 # Discord (optional)
@@ -139,7 +123,7 @@ DISCORD_BOT_TOKEN=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 
 # twitch.tv integration (optional)
 # https://dev.twitch.tv/console, while setting up a new app,
-# use OAuth Redirect URL: https://api.tf2pickup.eu/twitch/auth/return
+# use OAuth Redirect URL: https://tf2pickup.eu/twitch/auth/return
 TWITCH_CLIENT_ID=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
 TWITCH_CLIENT_SECRET=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
 
@@ -298,7 +282,7 @@ Go to the [Twitch Developers console](https://dev.twitch.tv/console) and registe
 
 ![twitch-dev-console-register-your-application](/img/content/site-components-deployment/twitch-dev-console-register-your-application.png)
 
-Define application name as `tf2pickup.eu` with OAuth Redirect URLs as `https://api.tf2pickup.eu/twitch/auth/return`. Choose any category - the best one for that purpose would be `Website Integration`. After defining that verify that you are not a bot and save.
+Define application name as `tf2pickup.eu` with OAuth Redirect URLs as `https://tf2pickup.eu/twitch/auth/return`. Choose any category - the best one for that purpose would be `Website Integration`. After defining that verify that you are not a bot and save.
 
 Then, you will see the application list. Find `tf2pickup.eu` and select **Manage**. You will be able to see the **Client ID**, the value used in `TWITCH_CLIENT_ID` variable. The Client Secret will be hidden, press New Secret and confirm it in the popup. The Client Secret will show up like on the screenshot below:
 
@@ -341,9 +325,9 @@ SERVER_PASSWORD=some_random_password
 STV_NAME=tf2pickup.eu TV
 STV_TITLE=tf2pickup.eu Source TV
 
-# Website API address, must match API_URL from .env file
+# Website address, must match WEBSITE_URL from .env file
 # Can be set in a server.cfg manually by a variable sm_tf2pickuporg_api_address
-TF2PICKUPORG_API_ADDRESS=https://api.tf2pickup.eu
+TF2PICKUPORG_API_ADDRESS=https://tf2pickup.eu
 
 # Secret value used in order to connect to the API, must match GAME_SERVER_SECRET from .env file
 # Can be set in a server.cfg manually by a variable sm_tf2pickuporg_secret
@@ -384,9 +368,9 @@ SERVER_PASSWORD=some_random_password
 STV_NAME=tf2pickup.eu TV
 STV_TITLE=tf2pickup.eu Source TV
 
-# Website API address, must match API_URL from .env file
+# Website address, must match WEBSITE_URL from .env file
 # can be set in a server.cfg manually by a variable sm_tf2pickuporg_api_address
-TF2PICKUPORG_API_ADDRESS=https://api.tf2pickup.eu
+TF2PICKUPORG_API_ADDRESS=https://tf2pickup.eu
 
 # Secret value used in order to connect to the API, must match GAME_SERVER_SECRET from .env file
 # can be set in a server.cfg manually by a variable sm_tf2pickuporg_secret
@@ -422,9 +406,9 @@ SERVER_PASSWORD=some_random_password
 STV_NAME=tf2pickup.eu TV
 STV_TITLE=tf2pickup.eu Source TV
 
-# Website API address, must match API_URL from .env file
+# Website address, must match WEBSITE_URL from .env file
 # can be set in a server.cfg manually by a variable sm_tf2pickuporg_api_address
-TF2PICKUPORG_API_ADDRESS=https://api.tf2pickup.eu
+TF2PICKUPORG_API_ADDRESS=https://tf2pickup.eu
 
 # Secret value used in order to connect to the API, must match GAME_SERVER_SECRET from .env file
 # can be set in a server.cfg manually by a variable sm_tf2pickuporg_secret
@@ -449,29 +433,22 @@ DEMOS_TF_APIKEY=XDXDXDXDXDXDXDXDXDXDXD..XD.XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 If you don't want to use Mumble, feel free to remove the 'mumble-server' part of the file.
 
 :::caution
-Examples below use **[bitnami/mongodb](https://hub.docker.com/r/bitnami/mongodb)** and **[bitnami/redis](https://hub.docker.com/r/bitnami/redis)** images, which are hardened non-root images.  
-Using them is optional - you are also fine with the official images for these containers, however environment variables are named differently.
+Examples below use **[bitnami/mongodb](https://hub.docker.com/r/bitnami/mongodb)** image, which is a hardened non-root image.
+Using it is optional - you are also fine with the official image for this container, however environment variables are named differently.
 :::
 
 ```docker
 services:
-  backend:
+  tf2pickup:
     depends_on:
       - mongodb
-      - redis
-    image: ghcr.io/tf2pickup-org/server:stable
+    image: ghcr.io/tf2pickup-org/tf2pickup:latest
     restart: always
     ports:
     - '3000:3000'
     - '9871:9871/udp'
     env_file:
     - ./.env
-
-  frontend:
-    image: ghcr.io/tf2pickup-org/tf2pickup.eu:stable
-    restart: always
-    ports:
-     - '4000:80'
 
   mumble-server:
     image: mumblevoip/mumble-server:latest
@@ -495,16 +472,6 @@ services:
     restart: always
     volumes:
     - database-data:/bitnami/mongodb
-    env_file:
-      - ./.env
-
-  redis:
-    image: bitnami/redis:7.2
-    restart: always
-    volumes:
-      - redis-data:/bitnami/redis/data
-    environment:
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
     env_file:
       - ./.env
 
@@ -546,7 +513,6 @@ services:
 
 volumes:
   database-data:
-  redis-data:
   mumble-data:
 ```
 
@@ -564,23 +530,16 @@ You can contact them on the <b><a href="https://discord.tf2pickup.eu">tf2pickup.
 
 ```docker
 services:
-  backend:
+  tf2pickup:
     depends_on:
       - mongodb
-      - redis
-    image: ghcr.io/tf2pickup-org/server:stable
+    image: ghcr.io/tf2pickup-org/tf2pickup:latest
     restart: always
     ports:
     - '3000:3000'
     - '9871:9871/udp'
     env_file:
     - ./.env
-
-  frontend:
-    image: ghcr.io/tf2pickup-org/tf2pickup.eu:stable
-    restart: always
-    ports:
-     - '4000:80'
 
   mongodb:
     image: bitnami/mongodb:4.4
@@ -592,17 +551,8 @@ services:
     env_file:
       - ./.env
 
-  redis:
-    image: bitnami/redis:7.2
-    restart: always
-    volumes:
-      - redis-data:/bitnami/redis/data
-    env_file:
-      - ./.env
-
 volumes:
   database-data:
-  redis-data:
 ```
 
 ## `docker-compose.yml` for gameservers only
@@ -669,7 +619,7 @@ Since Mumble is utilizing certificates being renewed by Certbot, it must refresh
 
 ## First site start
 
-Since [bitnami](https://hub.docker.com/u/bitnami) images are based on [Bitnami](https://hub.docker.com/u/bitnami) images, they do not use root user (UID 0) in order to control the service within the container. These services are supposed to run as a user with UID 1001 (you can overwrite the ID in `docker-compose.yml`), so in order to let service work you must set a right permissions for their respective data folders and `redis.conf` configuration file.
+If you use the [Bitnami](https://hub.docker.com/u/bitnami) MongoDB image, it does not use the root user (UID 0) to control the service within the container. The service is supposed to run as a user with UID 1001 (you can overwrite the ID in `docker-compose.yml`), so in order to let the service work you must set the right permissions for its data folder.
 
 When you have all the configuration files mentioned above ready to go, change `docker-compose.yml` in the following way:
 
@@ -682,24 +632,12 @@ When you have all the configuration files mentioned above ready to go, change `d
     - database-data:/bitnami/mongodb
     env_file:
       - ./.env
-    hostname: tf2pickup-eu-mongo
-
-  redis:
-    command: sleep infinity
-    image: bitnami/redis:7.2
-    restart: always
-    volumes:
-      - redis-data:/bitnami/redis/data
-    env_file:
-      - ./.env
-    hostname: tf2pickup-eu-redis
 ```
 
-The difference is within a parameter `command`. After that, start them two with `docker compose up -d mongodb redis`. Then change the permissions:
+The difference is within a parameter `command`. After that, start it with `docker compose up -d mongodb`. Then change the permissions:
 
 ```sh
-docker exec -i -u 0 tf2pickup-eu_mongo_1 chown -R 1001:1001 /bitnami/mongodb
-docker exec -i -u 0 tf2pickup-eu_client_1 chown -R 1001:1001 /bitnami/redis/data
+docker exec -i -u 0 tf2pickup-eu-mongodb-1 chown -R 1001:1001 /bitnami/mongodb
 ```
 
-When it's done, remove the `command` parameter lines from `docker-compose.yml` and and run `docker compose up -d` in order to start the entire stack. Each time you would like to stop the application stack, you are supposed to execute command `docker compose stop` and `docker compose start -d` when you start the stack. Containers have a `restart always` policy meaning the containers will always restart on fail, so it will also always start on a system boot as long as `docker.service` service is also starting on system boot.
+When it's done, remove the `command` parameter line from `docker-compose.yml` and run `docker compose up -d` in order to start the entire stack. Each time you would like to stop the application stack, you are supposed to execute command `docker compose stop` and `docker compose start -d` when you start the stack. Containers have a `restart always` policy meaning the containers will always restart on fail, so it will also always start on a system boot as long as `docker.service` service is also starting on system boot.

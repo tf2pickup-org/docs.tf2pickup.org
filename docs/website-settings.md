@@ -79,7 +79,7 @@ Lets server administrator set extra CVars which are executed upon configuration 
 Defines a logs.tf upload method, where available options are:
 
 - Off - no logs will be uploaded by logs.tf
-- Backend - logs will be uploaded by the tf2pickup.org server only
+- Backend - logs will be uploaded by the tf2pickup.org application only
 - Gameserver - logs will be uploaded by the logs.tf sourcemod plugin
 
 ## Configuring default player skill
@@ -179,7 +179,7 @@ By default, after map is being picked to a next pickup game, it is excluded for 
 ### Setting up ready state timeout
 
 :::warning
-Changing this variable is unsupported. Restart your backend in order to apply the change.
+Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
 
 Defines time in miliseconds (default: `60000``) default value: given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
@@ -187,14 +187,14 @@ Defines time in miliseconds (default: `60000``) default value: given for all pla
 ### Setting up ready up timeout
 
 :::warning
-Changing this variable is unsupported. Restart your backend in order to apply the change.
+Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
 
 Defines time in miliseconds (default: `40000`). After the ready up mode is canceled due to insufficient amount of people in the queue, this value defines a time during which all players who have been in the queue during last ready-up mode will be readied up automatically. Should be provided as an integer.
 
 ### Excluding specific serveme.tf gameservers
 
-If defined, when a backend reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
+If defined, when the application reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
 
 ### Changing promoted streams
 

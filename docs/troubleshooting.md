@@ -8,9 +8,9 @@ Here you can find how to resolve potential technical problems when setting up yo
 
 That is mostly because of two reasons:
 
-### Firewall blocks connections between site backend and mumble
+### Firewall blocks connections between the application and mumble
 
-Check firewall rules if they let your backend container make a connection in the same way as clients are supposed to. In general for mumble you should create rule in the INPUT chain letting services connect to it (both TCP/UDP traffic), as well as a rule letting your firewall forward traffic to it (TCP/UDP as well).
+Check firewall rules if they let your application container make a connection in the same way as clients are supposed to. In general for mumble you should create rule in the INPUT chain letting services connect to it (both TCP/UDP traffic), as well as a rule letting your firewall forward traffic to it (TCP/UDP as well).
 
 ### Mumble server uses old version of the TLS and/or self-signed certificates
 
@@ -24,25 +24,20 @@ Indication of this problem should look like this in the logs:
 ```
 
 This problem is a bit more tricky, because it may happen even if you have your firewall set and all data set properly in the Voice chat configuration. It happens when you use free servers from `mumble-de.cleanvoice.com` or `mumble-de.cleanvoice.ru` and it's because these servers use TLS 1.0/1.1 encryption instead of TLS 1.2/1.3 (safest ones at the time of writing, TLS 1.0 is unsafe and TLS 1.1 is deprecated).
-In that case you should add the following command to the `backend` clause in your website's `docker-compose.yml`:
+In that case you should add the following command to the `tf2pickup` service in your website's `docker-compose.yml`:
 
 ```docker-compose
-version: '3.9'
-
 services:
-  backend:
-    networks:
-      - tf2pickup-it-net
-    container_name: 'tf2pickup-it-server'
+  tf2pickup:
     depends_on:
       - mongodb
-    image: ghcr.io/tf2pickup-org/server:stable
+    image: ghcr.io/tf2pickup-org/tf2pickup:latest
     restart: always
     ports:
-     - '18001:3000'
-     - '18871:18871/udp'
-    volumes:
-    - './.env:/tf2pickup.pl/.env'
+     - '3000:3000'
+     - '9871:9871/udp'
+    env_file:
+    - ./.env
     command: ["node", "--tls-min-v1.0", "dist/src/main"]
 ```
 
@@ -52,10 +47,10 @@ The last line enables usage for older versions of the TLS protocol like 1.0 and 
 
 This problem can happen for reasons beyond our control like logs.tf service failure or it having a very high load at the moment, however from the setup side problems can be the following:
 
-- invalid firewall configuration not letting backend connect to logs.tf
+- invalid firewall configuration not letting the application connect to logs.tf
 - API key is invalid, outdated or not present
 
-The second options is more likely a problem. Since v10 the backend is supposed to send the logs and there is no logs.tf API key set in the .env configuration, it will throw an error in the container log like this one:
+The second option is more likely a problem. If there is no logs.tf API key set in the .env configuration, it will throw an error in the container log like this one:
 
 ```dockerlog
 [Nest] 1  - 01/07/2023, 8:46:19 PM     LOG [GameEventHandlerService] game #71 ended
@@ -70,18 +65,18 @@ WEBSITE_NAME=tf2pickup.eu
 LOGS_TF_API_KEY=your_logs_tf_api_key
 ```
 
-Afterwards, restart your backend container.
+Afterwards, restart your application container.
 
 ## Website works, nobody (even the first existing user) can log in
 
-This means your Steam API key used in the backend configuration is invalid, invalidated or expired. It can be indicated by the following entries in the log:
+This means your Steam API key used in the application configuration is invalid, invalidated or expired. It can be indicated by the following entries in the log:
 
 ```dockerlog
 [Nest] 1  - 12/17/2022, 11:14:37 AM    WARN [AuthController] Login error: 403 Error: Check your API key is correct
 [Nest] 1  - 12/17/2022, 6:56:01 PM    WARN [AuthController] Login error: 403 Error: Check your API key is correct
 ```
 
-To fix this, update `STEAM_API_KEY` property in `.env` file and restart your backend container.
+To fix this, update `STEAM_API_KEY` property in `.env` file and restart your application container.
 
 ## No scheme found in URI
 
@@ -213,10 +208,9 @@ db.games.updateOne({ number: 237 }, { $set: { demoUrl: 'https://demos.tf/903543'
 
 Initially we were suggesting to connect to the `admin` database in MongoDB in order to store site data [which is considered a bad practice](https://stackoverflow.com/questions/76106029/is-using-admin-database-in-mongodb-a-bad-practice-if-i-use-only-one-database-ins). In order to move out the data from the container you must:
 
-- change `MONGODB_DATABASE` to `tf2pickup` and `MONGODB_URI` at the end of the string from `/admin` to `/tf2pickup` in your `.env` file:
+- change `MONGODB_URI` at the end of the string from `/admin` to `/tf2pickup` in your `.env` file:
 
 ```env
-MONGODB_DATABASE=tf2pickup
 MONGODB_URI=mongodb://tf2pickup:yoursuperfunnypassword@tf2pickup-eu-mongo/tf2pickup
 ```
 
