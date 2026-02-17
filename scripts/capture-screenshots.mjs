@@ -336,6 +336,7 @@ async function main() {
   await page.goto(BASE_URL + '/admin')
   await waitForPage(page)
   await screenshot(page, 'overview', 'admin-panel.png')
+  await page.waitForTimeout(1000)
 
   // Player action log
   await page.goto(BASE_URL + '/admin/player-action-logs')
@@ -361,11 +362,6 @@ async function main() {
   await screenshot(page, 'common-tasks', 'find-profile-to-ban.png')
   // Same page also serves as the skill editing screenshot
   await screenshot(page, 'common-tasks', 'set-skills-for-a-player.png')
-
-  // Player bans page
-  await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/bans`)
-  await waitForPage(page)
-  await screenshot(page, 'common-tasks', 'player-bans-menu.png')
 
   // Add ban form - duration mode (default)
   await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/bans/add`)
@@ -476,8 +472,8 @@ async function main() {
     await ctx.close()
   }
 
-  // ─── Ban from player perspective ──────────────────────────────
-  console.log('\n📸 Ban from player perspective...')
+  // ─── Ban flow screenshots ───────────────────────────────────
+  console.log('\n📸 Ban flow screenshots...')
   // Accept rules for NewPlayer first so the ban banner is visible
   mongosh(`db.players.updateOne({ steamId: "${NEW_PLAYER.steamId}" }, { $set: { hasAcceptedRules: true } })`)
   // Ban the new player via the admin form
@@ -491,6 +487,11 @@ async function main() {
     await waitForPage(page)
     console.log('  ✓ Banned NewPlayer')
 
+    // Capture NewPlayer's ban list (shows the active ban with Revoke button)
+    await page.goto(BASE_URL + `/players/${NEW_PLAYER.steamId}/edit/bans`)
+    await waitForPage(page)
+    await screenshot(page, 'common-tasks', 'player-bans-menu.png')
+
     // Now log in as the banned player and see the ban notice
     const ctx = await browser.newContext({ viewport: VIEWPORT })
     const bannedPage = await ctx.newPage()
@@ -498,6 +499,13 @@ async function main() {
     await bannedPage.goto(BASE_URL + '/')
     await waitForPage(bannedPage)
     await bannedPage.waitForTimeout(500)
+    // Hide the browser notifications banner so only the ban alert is visible
+    await bannedPage.evaluate(() => {
+      for (const id of ['notifications-permission-default', 'notifications-permission-denied']) {
+        const el = document.getElementById(id)
+        if (el) el.style.display = 'none'
+      }
+    })
     await screenshot(bannedPage, 'common-tasks', 'ban-from-player-perspective.png')
     await ctx.close()
   }

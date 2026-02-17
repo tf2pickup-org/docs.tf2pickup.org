@@ -102,11 +102,15 @@ Editing nicknames is pretty easy. All you need do is to open a player profile, c
 
 ## Handing out bans
 
-In some cases you have to ban someone from playing pickups, mostly due to breaking site rules. In order to ban someone, open up their profile and click `bans` and `add ban` in the next menu.
+In some cases you have to ban someone from playing pickups, mostly due to breaking site rules. In order to ban someone, open up their profile and click `Edit player`.
 
 ![find-profile-to-ban](/img/content/common-tasks/find-profile-to-ban.png)
 
-Then, define a ban reason and the ban length. You can define a ban length by the duration, end date or without due date, meaning someone is getting banned forever. Click `add ban` after that.
+Then navigate to the `Bans` tab and click `Add ban`.
+
+![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
+
+Define a ban reason and the ban length. You can define a ban length by the duration, end date or without due date, meaning someone is getting banned forever. Click `Save` after that.
 
 ![ban-player-duration](/img/content/common-tasks/ban-player-duration.png)
 
@@ -114,17 +118,13 @@ Then, define a ban reason and the ban length. You can define a ban length by the
 
 ![ban-player-forever](/img/content/common-tasks/ban-player-forever.png)
 
-In that way the player is banned. You can see the ban history of a certain user in that menu.
-
-![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
-
 This is what the banned user sees when banned:
 
 ![ban-from-player-perspective](/img/content/common-tasks/ban-from-player-perspective.png)
 
 ### Revoke player ban
 
-Revoking a ban on a player is pretty easy. All you have to do is to click `revoke` on an active ban from the ban history list of a certain user.
+Revoking a ban on a player is pretty easy. All you have to do is to click the revoke button on an active ban from the ban history list.
 
 ![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
 
