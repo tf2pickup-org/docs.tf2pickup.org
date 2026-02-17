@@ -304,16 +304,22 @@ function replacePlayer(slotId, replacementSteamId) {
   mongosh(`db['games.substituterequests'].deleteOne({ gameNumber: ${FAKE_GAME_NUMBER}, slotId: "${slotId}" })`)
 }
 
-function forceEndGame() {
+function endGameNaturally() {
   mongosh(`
     db.games.updateOne(
       { number: ${FAKE_GAME_NUMBER} },
-      { $set: { state: "interrupted", connectString: null, stvConnectString: null },
+      { $set: {
+          state: "ended",
+          connectString: null,
+          stvConnectString: null,
+          logsUrl: "https://logs.tf/3305099",
+          demoUrl: "https://demos.tf/903543",
+          score: { blu: 2, red: 3 }
+        },
         $push: { events: {
           event: "ended",
           at: new Date(),
-          reason: "interrupted",
-          actor: "${SUPER_USER}"
+          reason: "match ended"
         }}
       }
     )
@@ -531,10 +537,10 @@ async function main() {
     await ctx.close()
   }
 
-  // Force-end the game and capture the ended state
+  // End the game naturally and capture the ended state
   console.log('\n📸 Ended game screenshot...')
-  forceEndGame()
-  console.log('  ✓ Game force-ended')
+  endGameNaturally()
+  console.log('  ✓ Game ended (match ended, score 2:3)')
   {
     const ctx = await browser.newContext({ viewport: VIEWPORT })
     const endedPage = await ctx.newPage()

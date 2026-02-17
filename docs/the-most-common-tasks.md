@@ -12,11 +12,11 @@ You may want to scramble the maps if one of the maps is played too often. You ca
 
 ## Reassigning game servers to games
 
-Sometimes player may experience technical problems with game servers such as unability to connect or high latencies. In cases like this, you may want to switch game server used for the game. Click `reassign...` to do it.
+Sometimes player may experience technical problems with game servers such as inability to connect or high latencies. In cases like this, you may want to switch the game server used for the game. Click `Reassign game server` to do it.
 
 ![pickup-start](/img/content/common-tasks/pickup-start.png)
 
-A list with all available servers will show up. Click on one of them to change.
+A list with all available servers will show up. Select one and click `Select` to change.
 
 :::info
 In case no static servers are available, game servers from serveme.tf will show up (when serveme.tf API is set correctly).
@@ -28,15 +28,15 @@ After that, a new server will reconfigure and people will be able to connect to 
 
 ## Reinitializing games
 
-Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the pickup server will try to reinitialize the game on the same pickup server.
+Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the pickup server will try to reinitialize the game on the same game server.
 
-In cases like this just click the `reinitialize server` button.
+In cases like this just click the `Reinitialize game server` button.
 
 ![reinitializing-the-game](/img/content/common-tasks/reinitializing-the-game.png)
 
 ## Force closing games
 
-In some cases the game may fail - sometimes because of an excessive amount of substitutes, sometimes because the game was not started and people still wait for a substitute or for some reason the pickup server does not end the pickup (change pickup state from `started` to `ended`). This is when the game should be force-closed. Click `force end` in order to force-close the game.
+In some cases the game may fail - sometimes because of an excessive amount of substitutes, sometimes because the game was not started and people still wait for a substitute or for some reason the game server does not end the game (change game state from `started` to `ended`). This is when the game should be force-closed. Click `Force-end` to force-close the game.
 
 :::caution
 Force ended games do not count in the player statistics.
