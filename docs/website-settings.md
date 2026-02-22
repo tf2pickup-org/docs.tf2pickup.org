@@ -126,14 +126,7 @@ Changing values through this interface is not supported. Change these settings o
 
 ![advanced-server-configuration](/img/content/website-settings/advanced-server-configuration.png)
 
-This menu (formerly called "Edit configuration") lets super-users change settings, which are not yet implemented as sub-menu options as well as options available in other views. We will focus here on settings which are unavailable in other views:
-
-- ban cooldown levels
-- map cooldown
-- ready state timeout
-- ready up timeout
-- excluding specific serveme.tf gameservers
-- change promoted streams
+This menu lets you access raw application settings, but beware - changing some of them is not supported and might break the application, so make sure you know what you're doing before touching anything here!
 
 ### Changing ban cooldown levels
 
@@ -178,10 +171,6 @@ By default, after map is being picked to a next pickup game, it is excluded for 
 
 ### Setting up ready state timeout
 
-:::warning
-Changing this variable is unsupported. Restart your application in order to apply the change.
-:::
-
 Defines time in milliseconds (default: `60000`) given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
 
 ### Setting up ready up timeout
@@ -190,13 +179,7 @@ Defines time in milliseconds (default: `60000`) given for all players to click t
 Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
 
-Defines time in milliseconds (default: `40000`). After the ready up mode is canceled due to insufficient amount of people in the queue, this value defines a time during which all players who have been in the queue during last ready-up mode will be readied up automatically. Should be provided as an integer.
-
 ### Excluding specific serveme.tf gameservers
-
-:::tip
-This setting is also available in the [Game Servers](/docs/final-touches#servemetf-integration-settings) admin panel under **Banned game server name patterns**.
-:::
 
 If defined, when the application reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
 
@@ -208,7 +191,11 @@ This setting lets the super-user modify a promoted stream list apart from stream
 
 Players who do not meet the registration requirements (such as having a public Steam profile, an ETF2L profile, or a minimum number of TF2 hours) will see an error when they try to log in. To allow such a player to register anyway, you can add their Steam ID to the bypass list.
 
-Go to the admin panel and choose `Bypass restrictions`. Enter the player's SteamID64 (for instance `76561198011558250`) and click `Add user Steam ID`.
+Go to the admin panel and choose `Bypass restrictions`. Enter the player's **SteamID64** (a 17-digit number, for instance `76561198011558250`) and click `Add user Steam ID`.
+
+:::important
+You must use the SteamID64 format. You can find a player's SteamID64 on their Steam profile URL or via tools like [steamid.io](https://steamid.io).
+:::
 
 ![bypass-registration-restrictions](/img/content/website-settings/bypass-registration-restrictions.png)
 

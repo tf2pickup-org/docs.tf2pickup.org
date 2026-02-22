@@ -12,6 +12,8 @@ That is mostly because of two reasons:
 
 Check firewall rules if they let your application container make a connection in the same way as clients are supposed to. In general for mumble you should create rule in the INPUT chain letting services connect to it (both TCP/UDP traffic), as well as a rule letting your firewall forward traffic to it (TCP/UDP as well).
 
+Also verify that the **Mumble internal address** field in the [voice chat settings](/docs/final-touches#set-up-voice-chat-settings) is set correctly. This field allows you to configure a separate internal address for the server to connect to (e.g. an internal IP or hostname), which may differ from the public address players use to connect.
+
 ### Mumble server uses old version of the TLS and/or self-signed certificates
 
 Indication of this problem should look like this in the logs:
@@ -50,15 +52,7 @@ This problem can happen for reasons beyond our control like logs.tf service fail
 - invalid firewall configuration not letting the application connect to logs.tf
 - API key is invalid, outdated or not present
 
-The second option is more likely a problem. If there is no logs.tf API key set in the .env configuration, it will throw an error in the container log like this one:
-
-```dockerlog
-[Nest] 1  - 01/07/2023, 8:46:19 PM     LOG [GameEventHandlerService] game #71 ended
-[Nest] 1  - 01/07/2023, 8:46:19 PM     LOG [LogCollectorService] uploading logs for game #71...
-[Nest] 1  - 01/07/2023, 8:46:20 PM   ERROR [LogCollectorService] uploading logs for game #71 failed: Error: logs.tf upload error: Invalid API key
-```
-
-Add lines the following lines to your `.env` file with proper values:
+The second option is more likely a problem. If the logs.tf API key is missing or invalid, the application will simply skip the log upload without crashing. Make sure the key is set correctly by adding the following lines to your `.env` file:
 
 ```env
 WEBSITE_NAME=tf2pickup.eu

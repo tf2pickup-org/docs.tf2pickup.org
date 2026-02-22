@@ -19,7 +19,7 @@ Sometimes player may experience technical problems with game servers such as ina
 A list with all available servers will show up. Select one and click `Select` to change.
 
 :::info
-In case no static servers are available, game servers from serveme.tf will show up (when serveme.tf API is set correctly).
+When the serveme.tf API key is configured, serveme.tf servers will always appear in the list alongside any static servers.
 :::
 
 ![reassign-server](/img/content/common-tasks/reassign-server.png)
@@ -82,7 +82,7 @@ If [player verification](/docs/website-settings#configuring-player-restrictions)
 
 ![set-skills-for-a-player](/img/content/common-tasks/set-skills-for-a-player.png)
 
-Adjust the values for each class and click `Save`. You can also click `Reset` to revert to the default skill values.
+Adjust the values for each class and click `Save`. You can also click `Reset` to revert the player's skills to the default values defined in the [default skill table](#defining-default-skill-values).
 
 ### Defining default skill values
 
