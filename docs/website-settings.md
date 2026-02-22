@@ -92,7 +92,7 @@ Since not all regions of the world participate in ETF2L or have a profile create
 
 - enable/disable user validation against the [ETF2L API](https://api-v2.etf2l.org),
 - define minimum TF2 in-game time spent in order to register to the website,
-- allow/deny players with no skill assigned.
+- require player verification to join the queue.
 
 The ETF2L user validation lets website:
 
@@ -110,9 +110,9 @@ In order to change the requirement, simply click on it, define a new amount of h
 
 ![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
-If the last setting is enabled, any used with skill not defined manually by an admin will not be able to join pickup queue and they will be notified about it:
+If **Require player verification** is enabled, admins must manually verify each player before they can join the queue. Unverified players will see the queue join buttons disabled. Admins can verify a player directly from their profile page using the **Player verified** checkbox in the admin toolbox.
 
-![your-account-needs-review](/img/content/website-settings/your-account-needs-review.png)
+When a player's verification status changes, a notification is sent to the Discord admin channel (green embed for verified, orange for revoked).
 
 ## Configuring voice server settings
 

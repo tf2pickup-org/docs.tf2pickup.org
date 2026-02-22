@@ -78,6 +78,8 @@ If you won't assign skill for a player - they will get skill values defined in a
 
 When an admin views a player's profile, a skill editing toolbox is displayed directly on the page. It shows input fields for each game class, a win-loss chart, and a save button.
 
+If [player verification](/docs/website-settings#configuring-player-restrictions) is enabled, the toolbox also shows a **Player verified** checkbox. Checking it allows the player to join the queue; unchecking it revokes that permission immediately.
+
 ![set-skills-for-a-player](/img/content/common-tasks/set-skills-for-a-player.png)
 
 Adjust the values for each class and click `Save`. You can also click `Reset` to revert to the default skill values.
