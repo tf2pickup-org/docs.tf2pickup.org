@@ -8,9 +8,9 @@ title: Site showcase
 
 ![tf2pickup.pl](/img/content/showcase/tf2pickup.pl.png)
 
-### [tf2pickup.es](https://tf2pickup.es)
+### [tf2pickup.fr](https://tf2pickup.fr)
 
-![tf2pickup.es](/img/content/showcase/tf2pickup.es.png)
+![tf2pickup.fr](/img/content/showcase/tf2pickup.fr.png)
 
 ### [tf2pickup.cz](https://tf2pickup.cz)
 
@@ -24,18 +24,6 @@ title: Site showcase
 
 ![tf2pickup.fi](/img/content/showcase/tf2pickup.fi.png)
 
-### [tf2pickup.se](https://tf2pickup.se)
-
-![tf2pickup.se](/img/content/showcase/tf2pickup.se.png)
-
-### [tf2pickup.pt](https://tf2pickup.pt)
-
-![tf2pickup.pt](/img/content/showcase/tf2pickup.pt.png)
-
-### [tf2pickup.co.il](https://tf2pickup.co.il)
-
-![tf2pickup.co.il](/img/content/showcase/tf2pickup.co.il.png)
-
 ### [tf2pickup.ru](https://tf2pickup.ru)
 
 ![tf2pickup.ru](/img/content/showcase/tf2pickup.ru.png)
@@ -44,10 +32,6 @@ title: Site showcase
 
 ![hl.br.tf2pickup.org](/img/content/showcase/hl.br.tf2pickup.org.png)
 
-### [hl.tf2pickup.eu](https://hl.tf2pickup.eu)
-
-![hl.tf2pickup.eu](/img/content/showcase/hl.tf2pickup.eu.png)
-
 ### [tf2pickup.eu](https://tf2pickup.eu)
 
 ![tf2pickup.eu](/img/content/showcase/tf2pickup.eu.png)
@@ -55,10 +39,6 @@ title: Site showcase
 ### [br.tf2pickup.org](https://br.tf2pickup.org)
 
 ![br.tf2pickup.org](/img/content/showcase/br.tf2pickup.org.png)
-
-### [ar.tf2pickup.org](https://ar.tf2pickup.org)
-
-![ar.tf2pickup.org](/img/content/showcase/ar.tf2pickup.org.png)
 
 ## Event only websites
 
@@ -80,9 +60,29 @@ title: Site showcase
 
 ## Discontinued websites
 
-### [tf2pickup.fr](https://tf2pickup.fr)
+### [tf2pickup.es](https://tf2pickup.es)
 
-![tf2pickup.fr](/img/content/showcase/tf2pickup.fr.png)
+![tf2pickup.es](/img/content/showcase/tf2pickup.es.png)
+
+### [tf2pickup.se](https://tf2pickup.se)
+
+![tf2pickup.se](/img/content/showcase/tf2pickup.se.png)
+
+### [tf2pickup.pt](https://tf2pickup.pt)
+
+![tf2pickup.pt](/img/content/showcase/tf2pickup.pt.png)
+
+### [tf2pickup.co.il](https://tf2pickup.co.il)
+
+![tf2pickup.co.il](/img/content/showcase/tf2pickup.co.il.png)
+
+### [hl.tf2pickup.eu](https://hl.tf2pickup.eu)
+
+![hl.tf2pickup.eu](/img/content/showcase/hl.tf2pickup.eu.png)
+
+### [ar.tf2pickup.org](https://ar.tf2pickup.org)
+
+![ar.tf2pickup.org](/img/content/showcase/ar.tf2pickup.org.png)
 
 ### [yu.tf2pickup.eu](https://yu.tf2pickup.eu)
 
