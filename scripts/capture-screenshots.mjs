@@ -1,0 +1,835 @@
+/**
+ * Captures screenshots for tf2pickup.org documentation.
+ *
+ * Prerequisites:
+ *   - Local tf2pickup v4 running at http://localhost:3000
+ *   - ENABLE_TEST_AUTH=true in .env
+ *   - DISCORD_BOT_TOKEN uncommented in .env
+ *   - Database loaded with tf2pickup.pl dump
+ *   - MongoDB accessible via docker exec tf2pickup-htmx-nodejs-mongo-1
+ *
+ * Usage:
+ *   npx playwright install chromium
+ *   node scripts/capture-screenshots.mjs
+ */
+
+import { chromium } from 'playwright'
+import { mkdirSync } from 'fs'
+import { resolve, dirname } from 'path'
+import { fileURLToPath } from 'url'
+import { execFileSync } from 'child_process'
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const STATIC_DIR = resolve(__dirname, '..', 'static', 'img', 'content')
+const BASE_URL = 'http://localhost:3000'
+const VIEWPORT = { width: 1600, height: 900 }
+
+// Super user from the tf2pickup.pl database dump
+const SUPER_USER = '76561198074409147'
+
+// A regular player (no admin roles) from the database for non-admin views
+const REGULAR_PLAYER = '76561198090785419'
+
+// A brand-new dummy player for registration flow screenshots (accept rules dialog, etc.)
+const NEW_PLAYER = {
+  steamId: '76561199999999999',
+  name: 'NewPlayer',
+  avatar: 'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb',
+}
+
+// Fake players to populate the queue (use avatars from real players in the dump)
+const FAKE_PLAYERS = [
+  { steamId: '76561199195756652', name: 'Promenader', avatar: 'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb' },
+  { steamId: '76561199195935001', name: 'Mayflower', avatar: '34525988887c731145eb2302b89be469257459ec' },
+  { steamId: '76561199195486701', name: 'Polemic', avatar: '974377c56a833204d53195fae34e151907d8aa84' },
+  { steamId: '76561199195468328', name: 'Shadowhunter', avatar: 'ceb67cec9bfc0d73de18e5004ee849534d740949' },
+  { steamId: '76561199195972852', name: 'MoonMan', avatar: 'e160ed7b362168bc83efd731fe7a0376e526832e' },
+  { steamId: '76561199195926019', name: 'Underfire', avatar: 'f562c91e5ff18da4c6adc8e326616914468fa381' },
+  { steamId: '76561199195611071', name: 'Astropower', avatar: '92eee1eca96618fe08a392467ca62512904c5801' },
+  { steamId: '76561199195733445', name: 'LlamaDrama', avatar: '98e37db3431b808d2d624464aa7aabce408f13e2' },
+  { steamId: '76561199195601536', name: 'SlitherTuft', avatar: 'a40b7478ad080f8ab8665c8665987e9d8862cc5a' },
+  { steamId: '76561199196157187', name: 'Blacklight', avatar: '7d978841542273ae58a8fc0126aad0e71bc9e29d' },
+  { steamId: '76561199195855422', name: 'AstraGirl', avatar: 'd2b721a2d179887476b06d0f007ed9534cf5b0e2' },
+  { steamId: '76561199195188363', name: 'BellBoy', avatar: 'b4771bbe7d200006dcc1554414d07c4d91e88e04' },
+]
+
+// Game number for the fake in-progress game (well above the highest existing game)
+const FAKE_GAME_NUMBER = 99999
+
+// 6v6 game slot layout for the fake game (all 12 players assigned to teams)
+const GAME_SLOTS = [
+  { id: 'red-scout-1',   player: 0,  team: 'red', gameClass: 'scout' },
+  { id: 'red-scout-2',   player: 1,  team: 'red', gameClass: 'scout' },
+  { id: 'red-soldier-1', player: 2,  team: 'red', gameClass: 'soldier' },
+  { id: 'red-soldier-2', player: 3,  team: 'red', gameClass: 'soldier' },
+  { id: 'red-demoman-1', player: 4,  team: 'red', gameClass: 'demoman' },
+  { id: 'red-medic-1',   player: 5,  team: 'red', gameClass: 'medic' },
+  { id: 'blu-scout-1',   player: 6,  team: 'blu', gameClass: 'scout' },
+  { id: 'blu-scout-2',   player: 7,  team: 'blu', gameClass: 'scout' },
+  { id: 'blu-soldier-1', player: 8,  team: 'blu', gameClass: 'soldier' },
+  { id: 'blu-soldier-2', player: 9,  team: 'blu', gameClass: 'soldier' },
+  { id: 'blu-demoman-1', player: 10, team: 'blu', gameClass: 'demoman' },
+  { id: 'blu-medic-1',   player: 11, team: 'blu', gameClass: 'medic' },
+]
+
+// 6v6 slot assignments for the fake players (not all slots filled to avoid
+// triggering the ready-up phase)
+const SLOT_ASSIGNMENTS = [
+  { player: 0, slot: 'scout-1' },
+  { player: 1, slot: 'scout-2' },
+  { player: 2, slot: 'scout-3' },
+  { player: 4, slot: 'soldier-1' },
+  { player: 5, slot: 'soldier-4' },
+  { player: 8, slot: 'demoman-1' },
+  { player: 10, slot: 'medic-1' },
+]
+
+function ensureDir(filepath) {
+  mkdirSync(dirname(filepath), { recursive: true })
+}
+
+function imgPath(category, filename) {
+  const p = resolve(STATIC_DIR, category, filename)
+  ensureDir(p)
+  return p
+}
+
+async function waitForPage(page) {
+  await page.waitForLoadState('networkidle')
+  // Give HTMX a moment to settle
+  await page.waitForTimeout(500)
+}
+
+async function loginAs(page, steamId) {
+  await page.goto(`${BASE_URL}/auth/test?steamId=${steamId}`, {
+    waitUntil: 'networkidle',
+  })
+  await page.waitForTimeout(1000)
+  const cookies = await page.context().cookies()
+  const sessionCookie = cookies.find(c => c.name === 'session')
+  if (!sessionCookie) {
+    throw new Error('Login failed - no session cookie')
+  }
+  console.log(`  Logged in as ${steamId}`)
+}
+
+async function screenshot(page, category, filename) {
+  const path = imgPath(category, filename)
+  await page.screenshot({ path, type: 'png' })
+  console.log(`  ✓ ${category}/${filename}`)
+}
+
+async function screenshotElement(page, selector, category, filename) {
+  const el = await page.waitForSelector(selector, { timeout: 5000 })
+  const path = imgPath(category, filename)
+  await el.screenshot({ path, type: 'png' })
+  console.log(`  ✓ ${category}/${filename} (element)`)
+}
+
+// ─── Database helpers ───────────────────────────────────────────────
+
+function mongosh(js) {
+  return execFileSync(
+    'docker',
+    ['exec', 'tf2pickup-htmx-nodejs-mongo-1', 'mongosh', '--quiet', '--eval', js, 'tf2pickup'],
+    { encoding: 'utf-8' },
+  ).trim()
+}
+
+function upsertFakePlayers() {
+  console.log('\n🗃️  Upserting fake players into database...')
+  for (const p of FAKE_PLAYERS) {
+    const avatarBase = `https://avatars.steamstatic.com/${p.avatar}`
+    mongosh(`
+      db.players.updateOne(
+        { steamId: "${p.steamId}" },
+        { $set: {
+          name: "${p.name}",
+          joinedAt: new Date(),
+          avatar: {
+            small: "${avatarBase}.jpg",
+            medium: "${avatarBase}_medium.jpg",
+            large: "${avatarBase}_full.jpg"
+          },
+          roles: [],
+          hasAcceptedRules: true,
+          cooldownLevel: 0,
+          preferences: {},
+          stats: { totalGames: 0, gamesByClass: {} }
+        },
+        $unset: { activeGame: 1 }
+        },
+        { upsert: true }
+      )
+    `)
+    console.log(`  ✓ ${p.name} (${p.steamId})`)
+  }
+}
+
+function createNewPlayer() {
+  console.log('\n🗃️  Creating new player for registration flow...')
+  const p = NEW_PLAYER
+  const avatarBase = `https://avatars.steamstatic.com/${p.avatar}`
+  mongosh(`
+    db.players.updateOne(
+      { steamId: "${p.steamId}" },
+      { $set: {
+        name: "${p.name}",
+        joinedAt: new Date(),
+        avatar: {
+          small: "${avatarBase}.jpg",
+          medium: "${avatarBase}_medium.jpg",
+          large: "${avatarBase}_full.jpg"
+        },
+        roles: [],
+        hasAcceptedRules: false,
+        cooldownLevel: 0,
+        preferences: {},
+        stats: { totalGames: 0, gamesByClass: {} }
+      },
+      $unset: { activeGame: 1 }
+      },
+      { upsert: true }
+    )
+  `)
+  console.log(`  ✓ ${p.name} (${p.steamId}) with hasAcceptedRules: false`)
+}
+
+function cleanupNewPlayer() {
+  mongosh(`db.players.deleteOne({ steamId: "${NEW_PLAYER.steamId}" })`)
+}
+
+function insertFakeGame() {
+  console.log('\n🎮 Inserting fake in-progress game into database...')
+  // Clean up any leftover from a previous failed run
+  mongosh(`db.games.deleteOne({ number: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db['games.substituterequests'].deleteMany({ gameNumber: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db.staticgameservers.deleteOne({ name: "tf2pickup.org #3" })`)
+  const now = new Date().toISOString()
+  const slotsJson = JSON.stringify(
+    GAME_SLOTS.map(s => ({
+      id: s.id,
+      player: FAKE_PLAYERS[s.player].steamId,
+      team: s.team,
+      gameClass: s.gameClass,
+      status: 'active',
+      connectionStatus: 'connected',
+      skill: 5 + Math.floor(Math.random() * 10),
+    })),
+  )
+  mongosh(`
+    db.games.insertOne({
+      number: ${FAKE_GAME_NUMBER},
+      map: "cp_process_final",
+      state: "started",
+      slots: ${slotsJson},
+      events: [
+        { event: "created", at: new Date("${now}") },
+        { event: "game server assigned", at: new Date("${now}"), gameServerName: "tf2pickup.org #1" },
+        { event: "game server initialized", at: new Date("${now}") },
+        { event: "started", at: new Date("${now}") },
+      ],
+      gameServer: {
+        id: "fake-server-1",
+        provider: "static",
+        name: "tf2pickup.org #1",
+        address: "45.33.22.11",
+        port: "27015",
+        rcon: { address: "45.33.22.11", port: "27015", password: "secret" }
+      },
+      connectString: "connect 45.33.22.11:27015; password pickup123",
+      stvConnectString: "connect 45.33.22.11:27020",
+      score: { blu: 2, red: 1 },
+    })
+  `)
+  // Set activeGame on all fake players so they see the connect button
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $set: { activeGame: ${FAKE_GAME_NUMBER} } })`)
+  // Insert a dummy online static game server for the reassign dialog
+  mongosh(`
+    db.staticgameservers.insertOne({
+      name: "tf2pickup.org #3",
+      address: "45.33.22.12",
+      port: "27015",
+      rconPassword: "secret",
+      isOnline: true,
+      priority: 1,
+      createdAt: new Date()
+    })
+  `)
+  console.log(`  ✓ Game #${FAKE_GAME_NUMBER} inserted (started, score 2:1)`)
+}
+
+function requestSubstitute(slotId, steamId, gameClass, team) {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER}, "slots.id": "${slotId}" },
+      { $set: { "slots.$.status": "waiting for substitute" },
+        $push: { events: {
+          event: "substitute requested",
+          at: new Date(),
+          player: "${steamId}",
+          gameClass: "${gameClass}",
+          actor: "${SUPER_USER}"
+        }}
+      }
+    )
+  `)
+  // Insert into the substitute requests collection for the queue page notification
+  mongosh(`
+    db['games.substituterequests'].insertOne({
+      gameNumber: ${FAKE_GAME_NUMBER},
+      slotId: "${slotId}",
+      team: "${team}",
+      gameClass: "${gameClass}"
+    })
+  `)
+}
+
+function replacePlayer(slotId, replacementSteamId) {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER}, "slots.id": "${slotId}" },
+      { $set: {
+        "slots.$.player": "${replacementSteamId}",
+        "slots.$.status": "active",
+        "slots.$.connectionStatus": "connected"
+      },
+        $push: { events: {
+          event: "player replaced",
+          at: new Date(),
+          replacee: "76561199195756652",
+          replacement: "${replacementSteamId}",
+          gameClass: "scout"
+        }}
+      }
+    )
+  `)
+  mongosh(`db['games.substituterequests'].deleteOne({ gameNumber: ${FAKE_GAME_NUMBER}, slotId: "${slotId}" })`)
+}
+
+function endGameNaturally() {
+  mongosh(`
+    db.games.updateOne(
+      { number: ${FAKE_GAME_NUMBER} },
+      { $set: {
+          state: "ended",
+          connectString: null,
+          stvConnectString: null,
+          logsUrl: "https://logs.tf/3305099",
+          demoUrl: "https://demos.tf/903543",
+          score: { blu: 2, red: 3 }
+        },
+        $push: { events: {
+          event: "ended",
+          at: new Date(),
+          reason: "match ended"
+        }}
+      }
+    )
+  `)
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $unset: { activeGame: 1 } })`)
+}
+
+function cleanupFakeGame() {
+  mongosh(`db.games.deleteOne({ number: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db['games.substituterequests'].deleteMany({ gameNumber: ${FAKE_GAME_NUMBER} })`)
+  mongosh(`db.staticgameservers.deleteOne({ name: "tf2pickup.org #3" })`)
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.updateMany({ steamId: { $in: [${steamIds}] } }, { $unset: { activeGame: 1 } })`)
+}
+
+function cleanupFakePlayers() {
+  console.log('\n🧹 Cleaning up fake players and game from database...')
+  cleanupFakeGame()
+  const steamIds = FAKE_PLAYERS.map(p => `"${p.steamId}"`).join(',')
+  mongosh(`db.players.deleteMany({ steamId: { $in: [${steamIds}] } })`)
+  cleanupNewPlayer()
+}
+
+// ─── Queue population ───────────────────────────────────────────────
+
+async function populateQueue(browser) {
+  console.log('\n👥 Populating queue with fake players...')
+  const contexts = []
+  const pages = []
+
+  // Process in batches of 6 to avoid overwhelming the server
+  for (let i = 0; i < SLOT_ASSIGNMENTS.length; i += 6) {
+    const batch = SLOT_ASSIGNMENTS.slice(i, i + 6)
+    await Promise.all(
+      batch.map(async ({ player: playerIdx, slot }) => {
+        const p = FAKE_PLAYERS[playerIdx]
+        const ctx = await browser.newContext({ viewport: VIEWPORT })
+        contexts.push(ctx)
+        const page = await ctx.newPage()
+        pages.push(page)
+
+        // Log in
+        await page.goto(`${BASE_URL}/auth/test?steamId=${p.steamId}`, {
+          waitUntil: 'networkidle',
+        })
+        await page.waitForTimeout(500)
+
+        // Navigate to queue
+        await page.goto(BASE_URL + '/')
+        await waitForPage(page)
+
+        // Click the join button for this slot
+        const joinButton = page.getByRole('button', { name: `Join queue on slot ${slot}` })
+        await joinButton.click()
+        await page.waitForTimeout(300)
+
+        console.log(`  ✓ ${p.name} joined ${slot}`)
+      }),
+    )
+  }
+
+  // Have some players vote for maps to show vote percentages.
+  // After joining, the vote buttons become enabled via client-side reactivity.
+  // We need to wait a moment for the isInQueue state to propagate.
+  console.log('  Casting map votes...')
+  await new Promise(r => setTimeout(r, 1000))
+  for (let i = 0; i < Math.min(pages.length, 5); i++) {
+    const pg = pages[i]
+    // First 3 players vote for the first map, next 2 for the second
+    const mapIdx = i < 3 ? 0 : 1
+    const voteButtons = pg.locator('button[aria-label^="Vote for map"]')
+    const count = await voteButtons.count()
+    if (count > mapIdx) {
+      const btn = voteButtons.nth(mapIdx)
+      // Force-click even if disabled attr is still settling
+      await btn.click({ force: true, timeout: 3000 }).catch(() => {})
+      await pg.waitForTimeout(200)
+    }
+  }
+  console.log('  ✓ Map votes cast')
+
+  return contexts
+}
+
+async function drainQueue(contexts) {
+  console.log('\n🚪 Draining queue (closing fake player sessions)...')
+  for (const ctx of contexts) {
+    await ctx.close()
+  }
+  // Give the server time to process disconnections
+  await new Promise(resolve => setTimeout(resolve, 2000))
+}
+
+// ─── Main ───────────────────────────────────────────────────────────
+
+async function main() {
+  const browser = await chromium.launch({ headless: true })
+
+  // Set up fake players in the database
+  upsertFakePlayers()
+
+  // ─── Queue screenshot with players ──────────────────────────────
+  console.log('\n📸 Queue screenshot (with players)...')
+  const queueContexts = await populateQueue(browser)
+
+  // Take the queue screenshot from a non-logged-in perspective
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const page = await ctx.newPage()
+    await page.goto(BASE_URL + '/')
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'pickup-queue.png')
+    await ctx.close()
+  }
+
+  // Drain the queue before taking other screenshots
+  await drainQueue(queueContexts)
+
+  // ─── Active game screenshots ──────────────────────────────────
+  console.log('\n📸 Active game screenshots...')
+  insertFakeGame()
+  const gameUrl = `${BASE_URL}/games/${FAKE_GAME_NUMBER}`
+
+  // Game page as admin (shows reinitialize, reassign, force-end buttons + request substitute)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const adminPage = await ctx.newPage()
+    await loginAs(adminPage, SUPER_USER)
+    await adminPage.goto(gameUrl)
+    await waitForPage(adminPage)
+    await screenshot(adminPage, 'common-tasks', 'pickup-start.png')
+    // The request substitute button is visible next to each player slot
+    await screenshot(adminPage, 'common-tasks', 'request-substitute-button.png')
+    // The reinitialize button
+    await screenshot(adminPage, 'common-tasks', 'reinitializing-the-game.png')
+
+    // Open the reassign game server dialog
+    await adminPage.click(`#game-${FAKE_GAME_NUMBER}-reassign-game-server-button`)
+    await adminPage.waitForSelector('#choose-game-server-dialog[open]', { timeout: 5000 })
+    await adminPage.waitForTimeout(1500) // wait for serveme.tf servers to load
+    await screenshot(adminPage, 'common-tasks', 'reassign-server.png')
+    // Close the dialog
+    await adminPage.keyboard.press('Escape')
+    await adminPage.waitForTimeout(300)
+
+    await ctx.close()
+  }
+
+  // Game page as a participating player (shows connect string)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const playerPage = await ctx.newPage()
+    await loginAs(playerPage, FAKE_PLAYERS[0].steamId)
+    await playerPage.goto(gameUrl)
+    await waitForPage(playerPage)
+    await screenshot(playerPage, 'overview', 'pickup-game-overview-as-a-player.png')
+    await ctx.close()
+  }
+
+  // Game page as a spectator (not logged in - shows STV connect string)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const spectatorPage = await ctx.newPage()
+    await spectatorPage.goto(gameUrl)
+    await waitForPage(spectatorPage)
+    await screenshot(spectatorPage, 'overview', 'pickup-game-overview-as-a-spectator.png')
+    await ctx.close()
+  }
+
+  // Request substitute flow
+  console.log('\n📸 Substitute flow screenshots...')
+  requestSubstitute('red-scout-1', FAKE_PLAYERS[0].steamId, 'scout', 'red')
+  console.log('  ✓ Substitute requested for red-scout-1')
+
+  // Substitute needed notification on the queue page
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const queuePage = await ctx.newPage()
+    await loginAs(queuePage, REGULAR_PLAYER)
+    await queuePage.goto(BASE_URL + '/')
+    await waitForPage(queuePage)
+    // Hide the notifications permission banner
+    await queuePage.evaluate(() => {
+      for (const id of ['notifications-permission-default', 'notifications-permission-denied']) {
+        const el = document.getElementById(id)
+        if (el) el.style.display = 'none'
+      }
+    })
+    await screenshot(queuePage, 'common-tasks', 'substitute-needed-notification.png')
+    await ctx.close()
+  }
+
+  // Game page with a free substitute spot (logged in as non-participant)
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const subPage = await ctx.newPage()
+    await loginAs(subPage, REGULAR_PLAYER)
+    await subPage.goto(gameUrl)
+    await waitForPage(subPage)
+    await screenshot(subPage, 'common-tasks', 'request-substitute-free-spot.png')
+    await ctx.close()
+  }
+
+  // After sub joins: replace the player in the DB and capture
+  replacePlayer('red-scout-1', REGULAR_PLAYER)
+  console.log('  ✓ Player replaced in red-scout-1')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const afterSubPage = await ctx.newPage()
+    await loginAs(afterSubPage, REGULAR_PLAYER)
+    await afterSubPage.goto(gameUrl)
+    await waitForPage(afterSubPage)
+    await screenshot(afterSubPage, 'common-tasks', 'request-substitute-after-joining.png')
+    await ctx.close()
+  }
+
+  // Game skill values GIF (skills hidden → skills shown toggle)
+  // Must be captured while the game is still in "started" state (admin toolbox visible)
+  console.log('\n📸 Game skill values GIF...')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const skillPage = await ctx.newPage()
+    await loginAs(skillPage, SUPER_USER)
+    await skillPage.goto(gameUrl)
+    await waitForPage(skillPage)
+
+    // Frame 1: skills hidden (default state)
+    const frame1 = imgPath('common-tasks', 'game-skill-values-frame1.png')
+    await skillPage.screenshot({ path: frame1, type: 'png' })
+
+    // Click the label wrapping the checkbox to toggle skill visibility
+    await skillPage.click('.show-assigned-skills-checkbox', { force: true })
+    await skillPage.waitForTimeout(500)
+
+    // Frame 2: skills shown
+    const frame2 = imgPath('common-tasks', 'game-skill-values-frame2.png')
+    await skillPage.screenshot({ path: frame2, type: 'png' })
+
+    // Combine into animated GIF (2 second delay between frames)
+    const gifPath = imgPath('common-tasks', 'game-skill-values.gif')
+    execFileSync('convert', [
+      '-delay', '200', frame1,
+      '-delay', '200', frame2,
+      '-loop', '0',
+      gifPath,
+    ])
+    // Clean up temporary frames
+    const { unlinkSync } = await import('fs')
+    unlinkSync(frame1)
+    unlinkSync(frame2)
+    console.log('  ✓ common-tasks/game-skill-values.gif')
+
+    await ctx.close()
+  }
+
+  // End the game naturally and capture the ended state
+  console.log('\n📸 Ended game screenshot...')
+  endGameNaturally()
+  console.log('  ✓ Game ended (match ended, score 2:3)')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const endedPage = await ctx.newPage()
+    await endedPage.goto(gameUrl)
+    await waitForPage(endedPage)
+    await screenshot(endedPage, 'overview', 'pickup-game-overview-after-a-game.png')
+    await ctx.close()
+  }
+
+  // ─── Overview screenshots (NOT logged in) ───────────────────────
+  console.log('\n📸 Overview screenshots (public view)...')
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const page = await ctx.newPage()
+
+    // Player list
+    await page.goto(BASE_URL + '/players')
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'player-list.png')
+
+    // Player profile (no admin toolbox visible)
+    await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}`)
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'player-profile.png')
+
+    // Stats
+    await page.goto(BASE_URL + '/statistics')
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'stats.png')
+
+    // Hall of fame
+    await page.goto(BASE_URL + '/hall-of-fame')
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'hall-of-fame.png')
+
+    // Rules page
+    await page.goto(BASE_URL + '/rules')
+    await waitForPage(page)
+    await screenshot(page, 'overview', 'rules-page.png')
+
+    await ctx.close()
+  }
+
+  // ─── Admin overview screenshots (logged in as super user) ───────
+  console.log('\n📸 Admin overview screenshots...')
+  const adminCtx = await browser.newContext({ viewport: VIEWPORT })
+  const page = await adminCtx.newPage()
+  await loginAs(page, SUPER_USER)
+
+  // Admin panel (redirects to /admin/player-restrictions)
+  await page.goto(BASE_URL + '/admin')
+  await waitForPage(page)
+  await screenshot(page, 'overview', 'admin-panel.png')
+  await page.waitForTimeout(1000)
+
+  // Player action log
+  await page.goto(BASE_URL + '/admin/player-action-logs')
+  await waitForPage(page)
+  await screenshot(page, 'overview', 'player-action-log.png')
+
+  // Settings page (user settings / Twitch integration)
+  await page.goto(BASE_URL + '/settings')
+  await waitForPage(page)
+  await screenshot(page, 'overview', 'integrate-twitch-account.png')
+
+  // ─── Common admin tasks ───────────────────────────────────────────
+  console.log('\n📸 Common tasks screenshots...')
+
+  // Scramble maps
+  await page.goto(BASE_URL + '/admin/scramble-maps')
+  await waitForPage(page)
+  await screenshot(page, 'common-tasks', 'scramble-maps.png')
+
+  // Player profile as admin (shows skill editing toolbox + edit button)
+  await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}`)
+  await waitForPage(page)
+  await screenshot(page, 'common-tasks', 'find-profile-to-ban.png')
+  // Same page also serves as the skill editing screenshot
+  await screenshot(page, 'common-tasks', 'set-skills-for-a-player.png')
+
+  // Add ban form - duration mode (default)
+  await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/bans/add`)
+  await waitForPage(page)
+  await screenshot(page, 'common-tasks', 'ban-player-duration.png')
+
+  // Add ban form - end date mode
+  await page.click('#lengthSelectorEndDate')
+  await page.waitForTimeout(300)
+  await screenshot(page, 'common-tasks', 'ban-player-enddate.png')
+
+  // Add ban form - forever mode
+  await page.click('#lengthSelectorForever')
+  await page.waitForTimeout(300)
+  await screenshot(page, 'common-tasks', 'ban-player-forever.png')
+
+  // Player edit profile (nickname, cooldown level)
+  await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/profile`)
+  await waitForPage(page)
+  await screenshot(page, 'common-tasks', 'open-player-skill-table.png')
+
+  // ─── Website settings screenshots ─────────────────────────────────
+  console.log('\n📸 Website settings screenshots...')
+
+  // Map pool
+  await page.goto(BASE_URL + '/admin/map-pool')
+  await waitForPage(page)
+  await screenshot(page, 'website-settings', 'set-map-pool.png')
+
+  // Game configuration
+  await page.goto(BASE_URL + '/admin/games')
+  await waitForPage(page)
+  await screenshot(page, 'website-settings', 'game-configuration.png')
+
+  // Player restrictions (also shows default player skill values)
+  await page.goto(BASE_URL + '/admin/player-restrictions')
+  await waitForPage(page)
+  await screenshot(page, 'website-settings', 'player-restrictions.png')
+
+  // Advanced server configuration (view-for-nerds)
+  await page.goto(BASE_URL + '/admin/view-for-nerds')
+  await waitForPage(page)
+  await screenshot(page, 'website-settings', 'advanced-server-configuration.png')
+
+  // Bypass registration restrictions
+  await page.goto(BASE_URL + '/admin/bypass-registration-restrictions')
+  await waitForPage(page)
+  await screenshot(page, 'website-settings', 'bypass-registration-restrictions.png')
+
+  // ─── Final touches screenshots ────────────────────────────────────
+  console.log('\n📸 Final touches screenshots...')
+
+  // Rules editor
+  await page.goto(BASE_URL + '/admin/rules')
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'edit-rules.png')
+
+  // Privacy policy editor
+  await page.goto(BASE_URL + '/admin/privacy-policy')
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'edit-privacy-policy.png')
+
+  // Game servers
+  await page.goto(BASE_URL + '/admin/game-servers')
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'game-servers-configuration.png')
+
+  // serveme.tf integration section (element screenshot of the serveme.tf panel)
+  {
+    const servemeTfSection = page.locator('.admin-panel-set').last()
+    await servemeTfSection.scrollIntoViewIfNeeded()
+    await page.waitForTimeout(300)
+    const servemeTfPath = imgPath('final-touches', 'configure-serveme-integration.png')
+    await servemeTfSection.screenshot({ path: servemeTfPath, type: 'png' })
+    console.log('  ✓ final-touches/configure-serveme-integration.png (element)')
+  }
+
+  // Voice chat settings
+  await page.goto(BASE_URL + '/admin/voice-server')
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'voice-chat-settings.png')
+
+  // Player roles (super user only)
+  await page.goto(BASE_URL + `/players/${REGULAR_PLAYER}/edit/roles`)
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'player-roles.png')
+
+  // Skill import/export
+  await page.goto(BASE_URL + '/admin/skill-import-export')
+  await waitForPage(page)
+  await screenshot(page, 'final-touches', 'import-players-skill.png')
+  // Same page also used for the skill table screenshot in common-tasks docs
+  await screenshot(page, 'common-tasks', 'skill-table.png')
+
+  // Discord settings
+  await page.goto(BASE_URL + '/admin/discord')
+  await waitForPage(page)
+  await screenshot(page, 'site-components-deployment', 'discord-settings.png')
+
+  // ─── Player settings ──────────────────────────────────────────────
+  console.log('\n📸 Player settings screenshots...')
+
+  await page.goto(BASE_URL + '/settings')
+  await waitForPage(page)
+  await screenshot(page, 'player-settings', 'player-settings.png')
+
+  // ─── Registration flow screenshots ─────────────────────────────
+  console.log('\n📸 Registration flow screenshots...')
+  createNewPlayer()
+  {
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const regPage = await ctx.newPage()
+    await loginAs(regPage, NEW_PLAYER.steamId)
+    await regPage.goto(BASE_URL + '/')
+    await waitForPage(regPage)
+    // Wait for the accept rules dialog to appear
+    await regPage.waitForSelector('dialog[title="Accept rules dialog"]', { timeout: 5000 })
+    await regPage.waitForTimeout(500)
+    await screenshot(regPage, 'final-touches', 'accept-site-rules.png')
+    await ctx.close()
+  }
+
+  // ─── Ban flow screenshots ───────────────────────────────────
+  console.log('\n📸 Ban flow screenshots...')
+  // Accept rules for NewPlayer first so the ban banner is visible
+  mongosh(`db.players.updateOne({ steamId: "${NEW_PLAYER.steamId}" }, { $set: { hasAcceptedRules: true } })`)
+  // Ban the new player via the admin form
+  {
+    await page.goto(BASE_URL + `/players/${NEW_PLAYER.steamId}/edit/bans/add`)
+    await waitForPage(page)
+    // Select "forever" and fill in a reason
+    await page.click('#lengthSelectorForever')
+    await page.fill('#banReason', 'Breaking site rules')
+    await page.click('button[type="submit"]')
+    await waitForPage(page)
+    console.log('  ✓ Banned NewPlayer')
+
+    // Capture NewPlayer's ban list (shows the active ban with Revoke button)
+    await page.goto(BASE_URL + `/players/${NEW_PLAYER.steamId}/edit/bans`)
+    await waitForPage(page)
+    await screenshot(page, 'common-tasks', 'player-bans-menu.png')
+
+    // Now log in as the banned player and see the ban notice
+    const ctx = await browser.newContext({ viewport: VIEWPORT })
+    const bannedPage = await ctx.newPage()
+    await loginAs(bannedPage, NEW_PLAYER.steamId)
+    await bannedPage.goto(BASE_URL + '/')
+    await waitForPage(bannedPage)
+    await bannedPage.waitForTimeout(500)
+    // Hide the browser notifications banner so only the ban alert is visible
+    await bannedPage.evaluate(() => {
+      for (const id of ['notifications-permission-default', 'notifications-permission-denied']) {
+        const el = document.getElementById(id)
+        if (el) el.style.display = 'none'
+      }
+    })
+    await screenshot(bannedPage, 'common-tasks', 'ban-from-player-perspective.png')
+    await ctx.close()
+  }
+
+  // ─── Cleanup ────────────────────────────────────────────────────
+  await browser.close()
+  cleanupFakePlayers()
+  console.log('\n✅ Done!')
+}
+
+main().catch(err => {
+  console.error(err)
+  process.exit(1)
+})

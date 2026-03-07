@@ -12,11 +12,9 @@ We discourage you from using inline HTML formatting, since it's buggy.
 
 ![edit-rules](/img/content/final-touches/edit-rules.png)
 
-After setting up the rules, they will show up in a popup for every user joining the site for the very first time (right with Mumble requirement notification):
+After setting up the rules, they will show up in a popup for every user joining the site for the very first time:
 
-![edit-rules](/img/content/final-touches/i-have-mumble.png)
-
-![edit-rules](/img/content/final-touches/accept-site-rules.png)
+![accept-site-rules](/img/content/final-touches/accept-site-rules.png)
 
 ## Reviewing the privacy policy
 
@@ -30,7 +28,7 @@ Please take a look at the privacy policy document; it is accessible for the user
 This feature is accessible only for accounts with Superuser role set.
 :::
 
-Version 10.x comes up with player action log feature. It lets you see who accessed the website, when and what the user agent of user's browser was. It is possible to filter results by entering:
+The player action log lets you see who accessed the website, when and what the user agent of user's browser was. It is possible to filter results by entering:
 
 - name,
 - Steam ID (SteamID64 format),
@@ -46,17 +44,11 @@ All connections to the website and gameservers are logged.
 
 Pickup games require game servers on which it can be set up. In order to do that, you have to define the same game server secret for the server (variable `GAME_SERVER_SECRET` in `.env`) and for game servers (variable `TF2PICKUPORG_SECRET` in `gameserver_x.env` or by defining `sm_tf2pickuporg_secret` value in game server's `server.cfg` configuration file). Server being behind a proxy [may need an internal address value defined](/docs/site-components-deployment#gameserver_1env).
 
-This mechanism is used since server version 8.x and the game server setup is being done automatically. After discovering newly setup game servers, they will show up on the server list, which can be accessed through Admin Panel -> Game servers:
+The game server setup is being done automatically. After discovering newly setup game servers, they will show up on the server list, which can be accessed through Admin Panel -> Game servers:
 
 ![game-servers-configuration](/img/content/final-touches/game-servers-configuration.png)
 
-If you have any static servers, they will show up on the list. You can click on any of them in order to see their address and to perform diagnostics. In order to do that, click the **Run diagnostics** button. The site will perform tests to ensure the game server works correctly.
-
-![game-server-details](/img/content/final-touches/game-server-details.png)
-
-There you can see the diagnostics status. In this case everything went smooth and things seem to be fine.
-
-![game-server-diagnostics](/img/content/final-touches/game-server-diagnostics.png)
+If you have any static servers, they will show up on the list.
 
 ### serveme.tf integration settings
 
@@ -68,11 +60,10 @@ Provided you have a valid serveme.tf API key set in your `.env` file, _serveme.t
 
 ![configure-serveme-integration](/img/content/final-touches/configure-serveme-integration.png)
 
-Currently the only setting you can define at this point is the preferred region of the reserved servers.
+Here you can configure:
 
-![change-serveme-preference](/img/content/final-touches/change-serveme-preference.png)
-
-You can also exclude servers from being reserved by providing keywords you want to avoid. For that, check [here](/docs/website-settings#excluding-specific-servemetf-gameservers).
+- **Preferred region** — pick the region closest to your players. If a server from the preferred region is not available, another one will be used instead.
+- **Banned game server name patterns** — exclude servers whose names contain any of the listed patterns from being reserved.
 
 ## Add admins to the site, set up whitelist, maps and skills
 
@@ -173,28 +164,14 @@ docker compose up -d --pull always
 
 If your containers are not set up with docker-compose, you will have to pull all container images you use manually and recreate containers with the same [port usage](https://docs.docker.com/config/containers/container-networking/), [network settings](https://docs.docker.com/engine/reference/run/#network-settings), [and volume setup](https://docs.docker.com/engine/reference/commandline/run/#mount-volumes-from-container---volumes-from).
 
-For example, here is our list of containers:
+For instance, let's say you want to upgrade the `tf2pickup-eu-tf2pickup-1` container. That means, in order to upgrade that single container, you will have to execute:
 
 ```bash
-tf2pickup@tf2pickup:~$ docker ps -a
-CONTAINER ID   IMAGE                                         COMMAND                  CREATED        STATUS        PORTS                                                                                  NAMES
-314aa034dbaa   portainer/portainer-ce:latest                 "/portainer"             33 hours ago   Up 15 hours   0.0.0.0:8000->8000/tcp, :::8000->8000/tcp, 0.0.0.0:9000->9000/tcp, :::9000->9000/tcp   portainer
-d8885d9c1660   mongo:4.0                                     "docker-entrypoint.s…"   33 hours ago   Up 15 hours   0.0.0.0:8001->27017/tcp, :::8001->27017/tcp                                            tf2pickup-eu_mongodb_1
-213e9ca18159   ghcr.io/tf2pickup-org/tf2-gameserver:latest   "./entrypoint.sh +sv…"   2 days ago     Up 15 hours                                                                                          tf2pickup-eu_gameserver2_1
-27b4baca2ed1   ghcr.io/tf2pickup-org/tf2-gameserver:latest   "./entrypoint.sh +sv…"   2 days ago     Up 15 hours                                                                                          tf2pickup-eu_gameserver1_1
-e5ffd4447a8d   containrrr/watchtower                         "/watchtower --clean…"   2 weeks ago    Up 15 hours   8080/tcp                                                                               watchtower
-02c53d082927   ghcr.io/tf2pickup-org/server                  "docker-entrypoint.s…"   2 weeks ago    Up 15 hours                                                                                          tf2pickup
-906a368fe18d   ghcr.io/tf2pickup-org/tf2pickup.eu            "/docker-entrypoint.…"   2 weeks ago    Up 15 hours   0.0.0.0:4000->80/tcp, :::4000->80/tcp                                                  tf2pickup-eu_client_1
-```
-
-For instance, let's say you want to upgrade a `tf2pickup-eu_client_1` container. This one is exposing its port TCP 80 to a host port TCP 4000 (both on IPv4 and IPv6 stacks). That means, in order to upgrade that single container, you will have to execute:
-
-```bash
-docker pull ghcr.io/tf2pickup-org/tf2pickup.eu
-docker rename tf2pickup-eu_client_1 tf2pickup-eu_client_1_old
-docker stop tf2pickup-eu_client_1_old
-docker run -d -p 4000:80 --name tf2pickup-eu_client_1 --restart always --volumes-from tf2pickup-eu_client_1_old ghcr.io/tf2pickup-org/tf2pickup.eu
-docker rm tf2pickup-eu_client_1_old
+docker pull ghcr.io/tf2pickup-org/tf2pickup:latest
+docker rename tf2pickup-eu-tf2pickup-1 tf2pickup-eu-tf2pickup-1_old
+docker stop tf2pickup-eu-tf2pickup-1_old
+docker run -d -p 3000:3000 -p 9871:9871/udp --name tf2pickup-eu-tf2pickup-1 --restart always --env-file ./.env ghcr.io/tf2pickup-org/tf2pickup:latest
+docker rm tf2pickup-eu-tf2pickup-1_old
 ```
 
 #### By one-time watchtower upgrade
@@ -221,11 +198,10 @@ docker run --rm \
     -v /var/run/docker.sock:/var/run/docker.sock \
     containrrr/watchtower \
     --run-once \
-    tf2pickup-eu_gameserver1_1 \
-    tf2pickup-eu_gameserver2_1 \
-    tf2pickup-eu_mongodb_1 \
-    tf2pickup-eu-server_1 \
-    tf2pickup-eu_client_1
+    tf2pickup-eu-tf2pickup-1 \
+    tf2pickup-eu-gameserver1-1 \
+    tf2pickup-eu-gameserver2-1 \
+    tf2pickup-eu-mongodb-1
 ```
 
 :::
@@ -303,7 +279,7 @@ TZ="Europe/Warsaw"
 # optional arguments when you want to set notifications to a Discord webhook
 WATCHTOWER_NOTIFICATIONS_LEVEL="info"
 WATCHTOWER_NOTIFICATIONS_HOSTNAME="tf2pickup.eu"
-WATCHTOWER_NOTIFICATION_TITLE_TAGE="[tf2pickup.eu] "
+WATCHTOWER_NOTIFICATION_TITLE_TAG="[tf2pickup.eu] "
 # format: discord://token@channel
 # https://discord.com/api/webhooks/1234567890123456789/XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
 # where the channel is 1234567890123456789 and the token is XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
@@ -314,52 +290,36 @@ Watchtower will pull images and replace container images automatically. It also 
 
 ## Blocking automatic updates when using watchtower
 
-:::caution
-Only use version of server and client that are compatible with each other. Mixing server and client version can and will break if not done properly. If you're unsure which version to use, you may always reach out for clarification.
-:::
-
-In some unusual cases you may want to prevent your website from updating. In order to do so, you must change the client and server tag in `docker-compose.yml` to a specific version (by default the tag used is `latest` **even if it's undefined**). For example:
+In some unusual cases you may want to prevent your website from updating. In order to do so, you must change the image tag in `docker-compose.yml` to a specific version (by default the tag used is `latest` **even if it's undefined**). For example:
 
 ```docker
 services:
-  backend:
+  tf2pickup:
     depends_on:
       - mongodb
-    image: ghcr.io/tf2pickup-org/server:stable
+    image: ghcr.io/tf2pickup-org/tf2pickup:latest
     restart: always
     ports:
     - '3000:3000'
     - '9871:9871/udp'
-    volumes:
-    - './.env:/tf2pickup.pl/.env'
-
-  frontend:
-    image: ghcr.io/tf2pickup-org/tf2pickup.eu:stable
-    restart: always
-    ports:
-     - '4000:80'
+    env_file:
+    - ./.env
 ```
 
 Can be switched to:
 
 ```docker
 services:
-  backend:
+  tf2pickup:
     depends_on:
       - mongodb
-    image: ghcr.io/tf2pickup-org/server:7.0.6
+    image: ghcr.io/tf2pickup-org/tf2pickup:4.0.0
     restart: always
     ports:
     - '3000:3000'
     - '9871:9871/udp'
-    volumes:
-    - './.env:/tf2pickup.pl/.env'
-
-  frontend:
-    image: ghcr.io/tf2pickup-org/tf2pickup.eu:3.19.4
-    restart: always
-    ports:
-     - '4000:80'
+    env_file:
+    - ./.env
 ```
 
 After that, you must restart all containers. You can do this by executing the following commands while being in a `tf2pickup-eu` folder containing both the `.env` and `docker-compose.yml` file:
@@ -465,9 +425,7 @@ docker exec tf2pickup-eu_mongodb_1 '/bin/bash' -c \
 
 In general you should let connection pass through for:
 
-- client:
-  - from/to the container to the host, so reverse proxy can let access it,
-- server:
+- tf2pickup application:
   - from/to the container to the host, so reverse proxy can let access it,
   - from/to the container to the outside, in this case it's port UDP 9871 and it's used for retrieving logs from the game servers,
 - mumble:

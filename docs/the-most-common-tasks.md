@@ -12,33 +12,31 @@ You may want to scramble the maps if one of the maps is played too often. You ca
 
 ## Reassigning game servers to games
 
-Sometimes player may experience technical problems with game servers such as unability to connect or high latencies. In cases like this, you may want to switch game server used for the game. Click `reassign...` to do it.
+Sometimes player may experience technical problems with game servers such as inability to connect or high latencies. In cases like this, you may want to switch the game server used for the game. Click `Reassign game server` to do it.
 
 ![pickup-start](/img/content/common-tasks/pickup-start.png)
 
-A list with all available servers will show up. Click on one of them to change.
+A list with all available servers will show up. Select one and click `Select` to change.
 
 :::info
-In case no static servers are available, game servers from serveme.tf will show up (when serveme.tf API is set correctly).
+When the serveme.tf API key is configured, serveme.tf servers will always appear in the list alongside any static servers.
 :::
 
 ![reassign-server](/img/content/common-tasks/reassign-server.png)
 
 After that, a new server will reconfigure and people will be able to connect to it.
 
-![reassign-server](/img/content/common-tasks/after-server-reassignment.png)
-
 ## Reinitializing games
 
-Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the pickup server will try to reinitialize the game on the same pickup server.
+Sometimes the game server may be stuck during the pickup initialization. In case the pickup starts up for over two minutes, you may want to reinitialize the game. This means that the application will try to reinitialize the game on the same game server.
 
-In cases like this just click the `reinitialize server` button.
+In cases like this just click the `Reinitialize game server` button.
 
 ![reinitializing-the-game](/img/content/common-tasks/reinitializing-the-game.png)
 
 ## Force closing games
 
-In some cases the game may fail - sometimes because of an excessive amount of substitutes, sometimes because the game was not started and people still wait for a substitute or for some reason the pickup server does not end the pickup (change pickup state from `started` to `ended`). This is when the game should be force-closed. Click `force end` in order to force-close the game.
+In some cases the game may fail - sometimes because of an excessive amount of substitutes, sometimes because the game was not started and people still wait for a substitute or for some reason the game server does not end the game (change game state from `started` to `ended`). This is when the game should be force-closed. Click `Force-end` to force-close the game.
 
 :::caution
 Force ended games do not count in the player statistics.
@@ -78,39 +76,23 @@ If you won't assign skill for a player - they will get skill values defined in a
 
 ### Assigning skills to a player
 
-In order to define skill for a certain player, go to a player page and click `edit`:
+When an admin views a player's profile, a skill editing toolbox is displayed directly on the page. It shows input fields for each game class, a win-loss chart, and a save button.
 
-![player-profile](/img/content/overview/player-profile.png)
-
-This is how skill definition looks like for a certain player on 6v6:
+If [player verification](/docs/website-settings#configuring-player-restrictions) is enabled, the toolbox also shows a **Player verified** checkbox. Checking it allows the player to join the queue; unchecking it revokes that permission immediately.
 
 ![set-skills-for-a-player](/img/content/common-tasks/set-skills-for-a-player.png)
 
-There you can see a skill definition view for Highlander (9v9):
-
-![set-skills-for-a-player-in-highlander](/img/content/common-tasks/set-skills-for-a-player-in-highlander.png)
+Adjust the values for each class and click `Save`. You can also click `Reset` to revert the player's skills to the default values defined in the [default skill table](#defining-default-skill-values).
 
 ### Defining default skill values
 
-In order to define player skills, go to the admin panel and choose `Default player skill`.
+Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class, and save.
 
-![define-default-player-skill-values](/img/content/common-tasks/define-default-player-skill-values.png)
-
-Then, define values for classes available and save it.
-
-![set-default-player-skill](/img/content/common-tasks/set-default-player-skill.png)
-
-Here is how it looks like for Highlander site:
-
-![set-default-player-skill-for-highlander](/img/content/common-tasks/set-default-player-skill-for-highlander.png)
+![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
 ### Reviewing skill values
 
-If you want to review skill values for all users on the website, go to the admin panel and choose `Player skill table`.
-
-![open-player-skill-table](/img/content/common-tasks/open-player-skill-table.png)
-
-You can sort all columns (containing nicknames and skill values) ascending/descending, just by clicking on the column names.
+You can export all player skills as a CSV file from the admin panel under `Skill import/export`. This lets you review and edit skill values in a spreadsheet application.
 
 ![skill-table](/img/content/common-tasks/skill-table.png)
 
@@ -120,11 +102,15 @@ Editing nicknames is pretty easy. All you need do is to open a player profile, c
 
 ## Handing out bans
 
-In some cases you have to ban someone from playing pickups, mostly due to breaking site rules. In order to ban someone, open up their profile and click `bans` and `add ban` in the next menu.
+In some cases you have to ban someone from playing pickups, mostly due to breaking site rules. In order to ban someone, open up their profile and click `Edit player`.
 
 ![find-profile-to-ban](/img/content/common-tasks/find-profile-to-ban.png)
 
-Then, define a ban reason and the ban length. You can define a ban length by the duration, end date or without due date, meaning someone is getting banned forever. Click `add ban` after that.
+Then navigate to the `Bans` tab and click `Add ban`.
+
+![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
+
+Define a ban reason and the ban length. You can define a ban length by the duration, end date or without due date, meaning someone is getting banned forever. Click `Save` after that.
 
 ![ban-player-duration](/img/content/common-tasks/ban-player-duration.png)
 
@@ -132,17 +118,13 @@ Then, define a ban reason and the ban length. You can define a ban length by the
 
 ![ban-player-forever](/img/content/common-tasks/ban-player-forever.png)
 
-In that way the player is banned. You can see the ban history of a certain user in that menu.
-
-![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
-
 This is what the banned user sees when banned:
 
 ![ban-from-player-perspective](/img/content/common-tasks/ban-from-player-perspective.png)
 
 ### Revoke player ban
 
-Revoking a ban on a player is pretty easy. All you have to do is to click `revoke` on an active ban from the ban history list of a certain user.
+Revoking a ban on a player is pretty easy. All you have to do is to click the revoke button on an active ban from the ban history list.
 
 ![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
 

@@ -7,11 +7,12 @@ Pickup admins are responsible for the game balance, healthy organization and - a
 They can:
 
 - assign skills to players, see skills of all players,
+- verify players (when player verification is required),
 - request player substitutes during the games,
 - ban players and revoke those bans,
 - manage the map pool,
 - manage the whitelist,
-- force create player accounts,
+- bypass registration restrictions for players,
 - scramble maps available in the votes,
 - edit static pages (like the rules page).
 
