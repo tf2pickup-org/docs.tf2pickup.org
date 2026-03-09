@@ -39,7 +39,7 @@ module.exports = {
       label: 'For developers',
       items: [
         'server-api',
-        'building-a-custom-client',
+        'custom-branding',
         'development-environment',
         'coding-style',
         'best-practices',

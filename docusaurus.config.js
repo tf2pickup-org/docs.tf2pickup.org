@@ -77,7 +77,7 @@ module.exports = {
           ],
         },
       ],
-      copyright: `Copyright © 2023 tf2pickup.org, Inc. Built with Docusaurus.`,
+      copyright: `Copyright © ${new Date().getFullYear()} tf2pickup.org, Inc. Built with Docusaurus.`,
     },
   },
   presets: [

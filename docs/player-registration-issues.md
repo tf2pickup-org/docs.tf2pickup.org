@@ -2,7 +2,7 @@
 title: Player registration issues
 ---
 
-Below you can find more details for problems that may occur upon player registration. In all cases, site admins can skip verifications by [disabling player restrictions](/docs/website-settings#configuring-player-restrictions) or by [force creating a profile](/docs/website-settings#force-create-a-player-account).
+Below you can find more details for problems that may occur upon player registration. In all cases, site admins can skip verifications by [disabling player restrictions](/docs/website-settings#configuring-player-restrictions) or by [adding the player to the bypass list](/docs/website-settings#bypass-registration-restrictions).
 
 ## ETF2L account is banned or blacklisted
 

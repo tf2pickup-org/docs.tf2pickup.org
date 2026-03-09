@@ -12,13 +12,13 @@ The following guide should be taken as an example, which is based on:
 - Cloudflare as a domain API provider for DNS zone dynamic updates,
 - Certbot as the certificate obtaining tool,
 - Nginx as a reverse proxy,
-- tf2pickup.org client and server hosted as containers on ports TCP 3000 for the server and TCP 4000 for the client. Ports can be customized.
+- tf2pickup.org application hosted as a container on port TCP 3000.
 
 Following these instructions should lead to configuration assessed as [A+ in Qualsys SSL Labs](https://www.ssllabs.com/ssltest/analyze.html?d=tf2pickup.eu) and [A+ in Mozilla Observatory](https://observatory.mozilla.org/analyze/tf2pickup.eu) tests. Most of the configuration examples given are based on configuration from the [tf2pickup.eu](https://tf2pickup.eu) website.
 
 ## Host recommendations
 
-We do not have any specific info what are the specific requirements for the whole setup, since it can be run with game servers and client/server on separate hosts. However, based on our experience, we suggest to get a machine (regardless whether it is a VPS or a dedicated server) with at least 4 vCPU (virtual CPU cores, preferably dedicated cores), 8 GB of RAM and at least 80 GB of SSD-based storage. Apparently 40 GB is probably enough to run the site with 2 game servers and mumble, but in most cases that disk size or even doubled one will be bundled with previous specs in an offer. Having a **static** IPv4 is a must, IPv6 address is optional. There are different options for host network speed and we suggest to get an offer with 1 Gbit/s both sides. Obviously the site will run with less, but having worse networking speed such as 250 Mbit/s both sides will greatly decrease the download speed for any host updates/game server updates.
+We do not have any specific info what are the specific requirements for the whole setup, since it can be run with game servers and the application on separate hosts. However, based on our experience, we suggest to get a machine (regardless whether it is a VPS or a dedicated server) with at least 4 vCPU (virtual CPU cores, preferably dedicated cores), 8 GB of RAM and at least 80 GB of SSD-based storage. Apparently 40 GB is probably enough to run the site with 2 game servers and mumble, but in most cases that disk size or even doubled one will be bundled with previous specs in an offer. Having a **static** IPv4 is a must, IPv6 address is optional. There are different options for host network speed and we suggest to get an offer with 1 Gbit/s both sides. Obviously the site will run with less, but having worse networking speed such as 250 Mbit/s both sides will greatly decrease the download speed for any host updates/game server updates.
 
 Our sites are run on different hostings, namely [OVH](https://ovh.com) (~~Strasbourg 🇫🇷~~, Gravelines 🇫🇷), [Hetzner](https://hetzner.com) (Nuremberg 🇩🇪, Helsinki 🇫🇮), [Netcup](https://netcup.eu) (Nuremberg 🇩🇪), [MyDevil](https://www.mydevil.net/) (Warsaw 🇵🇱) and many others.
 
@@ -31,19 +31,22 @@ In order to move a domain zone from the current site to Cloudflare, you are supp
 In that way all zone settings should be applicable from Cloudflare like on an image below:
 ![DNS nameservers list in OVH settings with change applied](/img/content/setup-prerequisites/dns-zone-cloudflare.png)
 
-A pickup domain should contain at least two `A` entries, but this configuration is the most recommended:
+A pickup domain should contain at least one `A` entry, but this configuration is the most recommended:
 
 | Entry type |        Name        |            Content            | Priority |        Mandatory           |
 |:----------:|:------------------:|:-----------------------------:|:--------:|:--------------------------:|
 |     `A`    |   `tf2pickup.eu`   |       host IPv4 address       |    n/d   |            YES             |
 |   `AAAA`   |   `tf2pickup.eu`   |       host IPv6 address       |    n/d   |            NO              |
-|     `A`    | `api.tf2pickup.eu` |       host IPv4 address       |    n/d   |            YES             |
-|   `AAAA`   | `api.tf2pickup.eu` |       host IPv6 address       |    n/d   |            NO              |
-|    `CAA`   | `api.tf2pickup.eu` | `0 issuewild letsencrypt.org` |    n/d   |            YES             |
+|    `CAA`   |   `tf2pickup.eu`   | `0 issuewild letsencrypt.org` |    n/d   |            YES             |
+
+:::info
+
+Since version 4, tf2pickup.org no longer requires a separate `api.` subdomain. The application serves both the UI and the API on a single domain.
+
+:::
 
 Usage of AAAA entries is optional. If you do not want to handle IPv6 on Docker, feel free to actually not use these. We encourage to use [CAA entry](https://support.dnsimple.com/articles/caa-record/) alongside Let's Encrypt certificates. Setting up proxying for A/AAAA entries is optional; it's always safer if you want to hide your public IP address in order to take advantage of the Cloudflare Anti-DDoS protection. However, you must take on account the following matters:
 
-- protection will work with a Free plan only if you use only one level subdomains, meaning it will work for `tf2pickup.eu` website as it has to use `tf2pickup.eu` and `api.tf2pickup.eu` domains in order to operate, where `br.tf2pickup.org` wouldn't work by default as we use a second level subdomain `api.br.tf2pickup.org` for backend connections. An alternative solution would be to modify the client in order to use a different first-level domain, so for example `brapi.tf2pickup.org` (first level subdomain) would be used. Multi-level subdomain certificates used for proxying by Cloudflare are available when you use Business or Enterprise plan.
 - in order to maintain anonymous status of the host IP for the website, you must host Mumble/gameservers on a different server, also Mumble should be available under a different domain, like `mumble.tf2pickup.eu`. Cloudflare Anti-DDoS works [only for the most popular ports](https://developers.cloudflare.com/fundamentals/reference/network-ports/), unless you use Spectrum which is available in Enterprise plan only, meaning hosting Mumble/game servers on the same server, while attempting to connect to it with a proxied domain will result in timeouts. Passing access to Mumble servers/game servers on the same server where the website resides has no sense at all, as you would have to disable proxying for this DNS entry which will leak your real host IP address.
 
 ### Recommended Cloudflare settings
@@ -110,13 +113,13 @@ Before getting certificates, a Cloudflare API token must be prepared for that ba
 After that, certificate should be able to be created by using the command (the `--agree-tos` and `-email` parameters must be given on a first certificate):
 
 ```sh
-certbot certonly --non-interactive -d 'tf2pickup.eu' -d '*.tf2pickup.eu' --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare --rsa-key-size 4096 --must-staple --agree-tos --email your-mailbox@you-are-really-using.com
+certbot certonly --non-interactive -d 'tf2pickup.eu' --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare --rsa-key-size 4096 --must-staple --agree-tos --email your-mailbox@you-are-really-using.com
 ```
 
 There is a special case if your domain is a subdomain of `tf2pickup.org` or `tf2pickup.eu`, for instance `br.tf2pickup.org` or `au.tf2pickup.org` which you have to use for (example given is for `br.tf2pickup.org`).
 
 ```sh
-certbot --nginx --non-interactive -d 'br.tf2pickup.org' -d 'api.br.tf2pickup.org' --rsa-key-size 4096 --must-staple --agree-tos --email your-mailbox@you-are-really-using.com
+certbot --nginx --non-interactive -d 'br.tf2pickup.org' --rsa-key-size 4096 --must-staple --agree-tos --email your-mailbox@you-are-really-using.com
 ```
 
 For the next certificate request you do not need to use `--agree-tos` and `--email` parameters anymore.
@@ -132,7 +135,7 @@ In case of failure most likely you:
 When the certificate is obtained, we suggest you to leave these two commands in the root crontab file (opened by a command `crontab -e` as root):
 
 ```crontab
-0  1   20 * *   certbot certonly --non-interactive -d 'tf2pickup.eu' -d '*.tf2pickup.eu' --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare --rsa-key-size 4096 --must-staple
+0  1   20 * *   certbot certonly --non-interactive -d 'tf2pickup.eu' --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare --rsa-key-size 4096 --must-staple
 5  1   20 * *   systemctl restart nginx
 ```
 
@@ -216,7 +219,7 @@ http {
 }
 ```
 
-``/etc/nginx/nginx/sites-available/tf2pickup.eu``:
+`/etc/nginx/sites-available/tf2pickup.eu`:
 
 ```nginx
 map $http_upgrade $connection_upgrade {
@@ -243,57 +246,21 @@ server {
         ssl_session_cache shared:ssl_session_cache:10m;
         ssl_trusted_certificate /etc/letsencrypt/live/tf2pickup.eu/chain.pem;
         location / {
-                proxy_pass http://127.0.0.1:4000;
-                add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
-                proxy_http_version 1.1;
-                proxy_set_header Upgrade $http_upgrade; # allow websockets
-                proxy_set_header Connection $connection_upgrade;
-                proxy_set_header X-Forwarded-For $remote_addr; # preserve client IP
-                }
-}
-```
-
-``/etc/nginx/nginx/sites-available/api.tf2pickup.eu``:
-
-```nginx
-map $http_upgrade $connection_upgrade {
-        default upgrade;
-        ''      close;
-}
-server {
-        listen 80;
-        #listen [::]:80; #IPv6 specific entry
-        server_name api.tf2pickup.eu;
-        return 302 https://api.tf2pickup.eu$request_uri;
-}
-server {
-        access_log /var/log/nginx/api.tf2pickup.eu-access.log;
-        error_log /var/log/nginx/api.tf2pickup.eu-error.log;
-        listen 443 ssl http2;
-        #listen [::]:443 ssl http2; #IPv6 specific entry
-        server_name api.tf2pickup.eu;
-        ssl_certificate /etc/letsencrypt/live/tf2pickup.eu/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/tf2pickup.eu/privkey.pem;
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
-        ssl_stapling on;
-        ssl_stapling_verify on;
-        ssl_session_cache shared:ssl_session_cache:10m;
-        ssl_trusted_certificate /etc/letsencrypt/live/tf2pickup.eu/chain.pem;
-        location / {
                 proxy_pass http://127.0.0.1:3000;
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
                 proxy_http_version 1.1;
                 proxy_set_header Upgrade $http_upgrade; # allow websockets
                 proxy_set_header Connection $connection_upgrade;
                 proxy_set_header X-Forwarded-For $remote_addr; # preserve client IP
+                proxy_set_header X-Forwarded-Proto $scheme;
+                proxy_set_header Host $host;
                 }
 }
 ```
 
-After placing those files, make sure to create symlinks to them in the `/etc/nginx/sites-enabled`:
+After placing the file, make sure to create a symlink to it in `/etc/nginx/sites-enabled`:
 
 ```sh
-# ln -s /etc/nginx/sites-available/api.tf2pickup.eu /etc/nginx/sites-enabled/api.tf2pickup.eu
 # ln -s /etc/nginx/sites-available/tf2pickup.eu /etc/nginx/sites-enabled/tf2pickup.eu
 ```
 

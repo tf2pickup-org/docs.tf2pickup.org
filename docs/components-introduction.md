@@ -2,22 +2,15 @@
 title: Components introduction
 ---
 
-In order to run a fully fledged tf2pickup.org instance, you are going to set up and configure a couple of components. These compoents can be served by a docker-compose container stack in Docker. That lets server administrators set up the project quickly, without any need of deep understanding of how certain elements of the site work, such us MongoDB configuration. Site deployment through Docker not only saves a lot of time for having a good understanding of how setup works, but also lets administrators run it in a separated environment, meaning there is no need for having anything very specific installed in your host system (besides Docker and docker-compose and the reverse proxy server).
+In order to run a fully fledged tf2pickup.org instance, you are going to set up and configure a couple of components. These components can be served by a docker-compose container stack in Docker. That lets server administrators set up the project quickly, without any need of deep understanding of how certain elements of the site work, such as MongoDB configuration. Site deployment through Docker not only saves a lot of time for having a good understanding of how setup works, but also lets administrators run it in a separated environment, meaning there is no need for having anything very specific installed in your host system (besides Docker, docker-compose and the reverse proxy server).
 
 ## The reverse proxy server
 
-This part of the setup is not currently delivered together with the tf2pickup.org container stack (however we plan to change it in the future). It lets users access the client lets them communicate with the backend, for instance when they log in to the site. This should be delivered together with SSL certificates, regardless if they are paid or free. We described all setup steps for both [here](/docs/setup-prerequisites).
+This part of the setup is not currently delivered together with the tf2pickup.org container stack. It routes traffic to the application and terminates SSL. This should be delivered together with SSL certificates, regardless if they are paid or free. We described all setup steps [here](/docs/setup-prerequisites).
 
-## The server
+## The application
 
-This is the backend of the whole system. It is responsible for accessing the database, configuring game servers and much, much more.
-Read how to deploy and configure one [here](/docs/site-components-deployment).
-
-## The client
-
-This is the frontend, the webpage itself. You can configure your own look'n'feel so that the service looks unique.
-It communicates with the server and presents the data to the user in a accessible, eye-catching and friendly way.
-[Here](/docs/building-a-custom-client) you will find the documentation on how to prepare your own branding, how to build the client and how to deploy it.
+The tf2pickup.org application is a single service that handles both the web interface and all backend logic — accessing the database, configuring game servers and much more. Read how to deploy and configure it [here](/docs/site-components-deployment).
 
 ## The voice server
 
@@ -61,5 +54,5 @@ We provide a [Docker image](https://github.com/tf2pickup-org/tf2-gameserver) tha
 
 The site deployment can be done in one of two ways:
 
-- Bundled - Server, client, game and voice server(s) on one host.
-- Divided - Server and client are both on one host, while game server(s) are on another. This does not exclude hosting game servers on multiple different hosts.
+- Bundled - The application, game and voice server(s) on one host.
+- Divided - The application is on one host, while game server(s) are on another. This does not exclude hosting game servers on multiple different hosts.

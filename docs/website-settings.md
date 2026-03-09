@@ -13,7 +13,7 @@ Currently website settings lets you:
 - configure player restrictions,
 - configure voice server,
 - configure advanced site settings,
-- force create player account,
+- bypass registration restrictions,
 - import player skill,
 - show site player skill table,
 - scramble maps available to vote at the moment,
@@ -72,14 +72,14 @@ When the value is set for 0, no rejoin gameserver timeout time is being checked.
 
 ### Execution of extra commands
 
-Lets server administrator set extra CVars which are executed upon configuration file execution given for a map being run on the gameserver, one CVar per line. Leaving it empty means no extra configuration for the gameserver.
+Allows the server administrator to set extra CVars which are executed upon configuration file execution given for a map being run on the game server, one CVar per line. Leaving it empty means no extra configuration for the game server.
 
 ### Logs.tf upload method
 
 Defines a logs.tf upload method, where available options are:
 
 - Off - no logs will be uploaded by logs.tf
-- Backend - logs will be uploaded by the tf2pickup.org server only
+- Backend - logs will be uploaded by the tf2pickup.org application only
 - Gameserver - logs will be uploaded by the logs.tf sourcemod plugin
 
 ## Configuring default player skill
@@ -92,7 +92,7 @@ Since not all regions of the world participate in ETF2L or have a profile create
 
 - enable/disable user validation against the [ETF2L API](https://api-v2.etf2l.org),
 - define minimum TF2 in-game time spent in order to register to the website,
-- allow/deny players with no skill assigned.
+- require player verification to join the queue.
 
 The ETF2L user validation lets website:
 
@@ -110,15 +110,15 @@ In order to change the requirement, simply click on it, define a new amount of h
 
 ![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
-If the last setting is enabled, any used with skill not defined manually by an admin will not be able to join pickup queue and they will be notified about it:
+If **Require player verification** is enabled, admins must manually verify each player before they can join the queue. Unverified players will see the queue join buttons disabled. Admins can verify a player directly from their profile page using the **Player verified** checkbox in the admin toolbox.
 
-![your-account-needs-review](/img/content/website-settings/your-account-needs-review.png)
+When a player's verification status changes, a notification is sent to the Discord admin channel (green embed for verified, orange for revoked).
 
 ## Configuring voice server settings
 
 See [here](/docs/final-touches#set-up-voice-chat-settings).
 
-## Configuring advanced site settings
+## View for nerds
 
 :::warning
 Changing values through this interface is not supported. Change these settings only if you know what you're doing and if you change anything here, make sure you have made a database backup first.
@@ -126,18 +126,11 @@ Changing values through this interface is not supported. Change these settings o
 
 ![advanced-server-configuration](/img/content/website-settings/advanced-server-configuration.png)
 
-This menu lets super-users change settings, which are not yet implemented as sub-menu options as well as options available in other views. We will focus here on settings which are unavailable in other views:
-
-- ban cooldown levels
-- map cooldown
-- ready state timeout
-- ready up timeout
-- excluding specific serveme.tf gameservers
-- change promoted streams
+This menu lets you access raw application settings, but beware - changing some of them is not supported and might break the application, so make sure you know what you're doing before touching anything here!
 
 ### Changing ban cooldown levels
 
-Lets specify the amount of cooldown levels as well as the ban length in miliseconds. Should be provided in JSON format in one line. Default settings are:
+Allows specifying the amount of cooldown levels as well as the ban length in milliseconds. Should be provided in JSON format in one line. Default settings are:
 
 ```json
 [
@@ -178,68 +171,38 @@ By default, after map is being picked to a next pickup game, it is excluded for 
 
 ### Setting up ready state timeout
 
-:::warning
-Changing this variable is unsupported. Restart your backend in order to apply the change.
-:::
-
-Defines time in miliseconds (default: `60000``) default value: given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
+Defines time in milliseconds (default: `60000`) given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
 
 ### Setting up ready up timeout
 
 :::warning
-Changing this variable is unsupported. Restart your backend in order to apply the change.
+Changing this variable is unsupported. Restart your application in order to apply the change.
 :::
-
-Defines time in miliseconds (default: `40000`). After the ready up mode is canceled due to insufficient amount of people in the queue, this value defines a time during which all players who have been in the queue during last ready-up mode will be readied up automatically. Should be provided as an integer.
 
 ### Excluding specific serveme.tf gameservers
 
-If defined, when a backend reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
+If defined, when the application reserves a serveme.tf server, it will not pick any servers with a name which contains values given in an array. Empty by default. Example: `[  "NewBrigade",  "MonikaBrigade"]`
 
 ### Changing promoted streams
 
 This setting lets the super-user modify a promoted stream list apart from streams of all players who have integrated their accounts with Twitch. Options should be provided as an array. Default value: `[  "teamfortresstv",  "teamfortresstv2",  "teamfortresstv3",  "kritzkast",  "kritzkast2",  "rglgg",  "essentialstf",  "cappingtv",  "cappingtv2",  "cappingtv3",  "tflivetv"]`
 
-## Force create a player account
+## Bypass registration restrictions
 
-This lets you force create accounts, omitting registration requirements which are:
+Players who do not meet the registration requirements (such as having a public Steam profile, an ETF2L profile, or a minimum number of TF2 hours) will see an error when they try to log in. To allow such a player to register anyway, you can add their Steam ID to the bypass list.
 
-- having a public profile with public game progress, just like here:
+Go to the admin panel and choose `Bypass restrictions`. Enter the player's **SteamID64** (a 17-digit number, for instance `76561198011558250`) and click `Add user Steam ID`.
 
-![public-game-details](/img/content/website-settings/public-game-details.png)
+:::important
+You must use the SteamID64 format. You can find a player's SteamID64 on their Steam profile URL or via tools like [steamid.io](https://steamid.io).
+:::
 
-In case a player won't have the game details public, an error will show up after the first log-in:
+![bypass-registration-restrictions](/img/content/website-settings/bypass-registration-restrictions.png)
 
-![error-tf2-private-details](/img/content/website-settings/error-tf2-private-details.png)
-
-- having an ETF2L profile ([like this](https://etf2l.org/forum/user/48288/)),
-
-If the player doesn't have an ETF2L profile registered then an error will show up after the first log-in.:
-
-![error-tf2-insufficient-tf2-game-hours](/img/content/website-settings/error-tf2-insufficient-tf2-game-hours.png)
-
-- having more than 500 hours in the Team Fortress 2:
-
-![tf2-in-game-hours](/img/content/website-settings/tf2-in-game-hours.png)
-
-In case a player won't have the sufficient amount of hours spent in the Team Fortress 2, an error will show up after the first log-in:
-
-![error-tf2-insufficient-tf2-game-hours](/img/content/website-settings/error-tf2-insufficient-tf2-game-hours.png)
-
-All you need to do is to enter a player nickname and SteamID64 format value, for instance `76561198011558250`.
-
-![force-create-user-account](/img/content/website-settings/force-create-user-account.png)
-
-When the profile is created, it will be completely empty like on this screenshot below:
-
-![force-created-profile](/img/content/website-settings/force-created-profile.png)
-
-All user data will be filled up once the user for which an account was force created will log-in to the site.
+Once their Steam ID is on the bypass list, the player can log in normally through Steam — the registration restrictions will be skipped for them. Their profile will be created automatically when they log in for the first time.
 
 :::tip
-
-If a player comes in an issue where they cannot log in due to the errors shown above, let them know that they should wait a bit before they attempt to log in again, because otherwise they will end up with the same error for a short period of time.
-
+If a player had a failed login attempt due to registration restrictions, let them know to wait a moment before trying again, because the error may persist briefly.
 :::
 
 ## Setting up player skills
