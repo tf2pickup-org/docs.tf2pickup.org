@@ -52,17 +52,13 @@ Several environment variables have changed:
 | `BOT_NAME` | No longer needed |
 | `REDIS_PASSWORD` | Redis is no longer used |
 | `REDIS_URL` | Redis is no longer used |
-| `MONGODB_ROOT_USER` | Configure MongoDB separately |
-| `MONGODB_ROOT_PASSWORD` | Configure MongoDB separately |
-| `MONGODB_USERNAME` | Configure MongoDB separately |
-| `MONGODB_DATABASE` | Configure MongoDB separately |
-| `MONGODB_PASSWORD` | Configure MongoDB separately |
 
 #### New
 
 | Variable | Description |
 |----------|-------------|
 | `WEBSITE_URL` | Full URL where the instance is accessed (e.g. `https://tf2pickup.eu`). Replaces both `API_URL` and `CLIENT_URL`. |
+| `WEBSITE_BRANDING` | _(optional)_ Name of the branding profile to use for logos and favicons. See [custom branding](custom-branding) for details. |
 | `NODE_ENV` | Set to `production` for production deployments. |
 | `LOG_LEVEL` | Logging level. Possible values: `fatal`, `error`, `warn`, `info`, `debug`, `trace`. Defaults to `info`. |
 | `THUMBNAIL_SERVICE_URL` | Map thumbnail service URL. Defaults to `https://mapthumbnails.tf2pickup.org`. |
@@ -74,7 +70,6 @@ Several environment variables have changed:
 | Variable | What changed |
 |----------|-------------|
 | `LOG_RELAY_ADDRESS` | Was the API hostname (e.g. `api.tf2pickup.eu`). Now should be set to your public hostname and port (e.g. `tf2pickup.eu:3000`). |
-| `QUEUE_CONFIG` | Now also supports `ultiduo` and `test` gamemodes in addition to `6v6`, `9v9`, and `bball`. |
 
 #### Unchanged
 
@@ -124,6 +119,18 @@ to:
 ```
 https://tf2pickup.eu/twitch/auth/return
 ```
+
+### Game server connector
+
+If your game servers use the [connector](https://github.com/tf2pickup-org/connector) plugin, update the `sm_tf2pickuporg_api_address` cvar to point to your new single-domain URL instead of the old `api.` subdomain. For example:
+
+```
+sm_tf2pickuporg_api_address "https://tf2pickup.eu"
+```
+
+### Discord invite link
+
+The Discord invite link is no longer part of the website branding. After upgrading, go to the **Admin panel → Miscellaneous** section and fill in your Discord invite link there.
 
 ---
 
