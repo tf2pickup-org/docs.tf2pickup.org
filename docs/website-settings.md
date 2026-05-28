@@ -114,6 +114,8 @@ If **Require player verification** is enabled, admins must manually verify each 
 
 When a player's verification status changes, a notification is sent to the Discord admin channel (green embed for verified, orange for revoked).
 
+If **Skill suggestions** is enabled (experimental, on by default), the admin toolbox on player profile pages shows arrows next to class skill inputs when a player's ELO consistently suggests their manually-set skill may be miscalibrated. See [Skill suggestions](/docs/the-most-common-tasks#skill-suggestions-experimental) for details.
+
 ## Configuring voice server settings
 
 See [here](/docs/final-touches#set-up-voice-chat-settings).
