@@ -94,10 +94,10 @@ Adjust the values for each class and click `Save`. You can also click `Reset` to
 
 ### Skill suggestions (experimental)
 
-When the **Skill suggestions** option is enabled in [Player Restrictions](/docs/website-settings#configuring-player-restrictions), the admin toolbox shows small arrows next to class skill inputs where the player's ELO suggests a miscalibration:
+When the **Skill suggestions** option is enabled in [Player Restrictions](/docs/website-settings#configuring-player-restrictions), the admin toolbox shows small arrows next to class skill inputs where a player's in-game performance consistently suggests a miscalibration:
 
-- **↑ arrow** — the player's ELO for that class is consistently above 1550, suggesting the skill value may be set too low.
-- **↓ arrow** — the player's ELO for that class is consistently below 1450, suggesting the skill value may be set too high.
+- **↑ arrow** — the player's performance on that class consistently suggests the skill value may be set too low.
+- **↓ arrow** — the player's performance on that class consistently suggests the skill value may be set too high.
 
 Suggestions require at least 10 games on the class to appear. After you manually adjust a player's skill, suggestions for that class are silenced for 3 games to give the change time to take effect.
 
