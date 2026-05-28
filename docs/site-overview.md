@@ -34,6 +34,8 @@ title: Site overview
 
 ### Stats
 
+The statistics page shows game activity over time. The **Games launched per day** chart can be filtered by time range — options include the last 30 days, 90 days, 6 months, 1 year, and **All time**, which shows the full history since the site launched.
+
 ![stats](/img/content/overview/stats.png)
 
 ### Hall of fame

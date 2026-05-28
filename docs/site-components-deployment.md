@@ -136,6 +136,11 @@ SERVEME_TF_API_ENDPOINT=serveme.tf
 # Grab your serveme.tf key here: https://serveme.tf/settings
 SERVEME_TF_API_KEY=your_serveme_tf_api_key
 
+# tf2-quick-server integration (optional)
+# Contact the tf2-quick-server team to obtain credentials.
+# TF2_QUICK_SERVER_CLIENT_ID=your_client_id
+# TF2_QUICK_SERVER_CLIENT_SECRET=your_client_secret
+
 ### Mumble Server Configuration
 # SuperUser account password
 MUMBLE_SUPERUSER_PASSWORD=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXD

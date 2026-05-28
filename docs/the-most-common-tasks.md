@@ -4,6 +4,14 @@ title: The most common tasks
 
 Here you can find a list of the tasks admins perform on the site:
 
+## Clearing the queue
+
+If you need to reset the queue instantly — for example during a test, or when players are unresponsive — use the **Clear queue** button in the queue header. This button is only visible to admins.
+
+Clicking it will ask for confirmation before proceeding. Once confirmed, all players are removed from their queue slots. A notification is sent to the admin Discord channel with your name and the number of players removed. The map vote and queue state are preserved.
+
+![clear-queue](/img/content/common-tasks/clear-queue.png)
+
 ## Scramble maps
 
 You may want to scramble the maps if one of the maps is played too often. You can do so by clicking this button in the Admin panel:
@@ -84,6 +92,23 @@ If [player verification](/docs/website-settings#configuring-player-restrictions)
 
 Adjust the values for each class and click `Save`. You can also click `Reset` to revert the player's skills to the default values defined in the [default skill table](#defining-default-skill-values).
 
+### Skill suggestions (experimental)
+
+When the **Skill suggestions** option is enabled in [Player Restrictions](/docs/website-settings#configuring-player-restrictions), the admin toolbox shows small arrows next to class skill inputs where a player's in-game performance consistently suggests a miscalibration:
+
+- **↑ arrow** — the player's performance on that class consistently suggests the skill value may be set too low.
+- **↓ arrow** — the player's performance on that class consistently suggests the skill value may be set too high.
+
+Suggestions require at least 10 games on the class to appear. After you manually adjust a player's skill, suggestions for that class are silenced for 3 games to give the change time to take effect.
+
+:::note
+This feature is experimental. It can be toggled from the Player Restrictions page in the admin panel.
+:::
+
+### Reviewing skills in the queue
+
+When you hover over a player's name in a queue slot, a tooltip shows their skill values for each class that has one assigned. Players with no skill assigned at all are marked with a clover icon to help you spot fresh players at a glance.
+
 ### Defining default skill values
 
 Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class, and save.
@@ -153,3 +178,7 @@ After opening up a link, you can see a free spot where you can join in and you c
 Upon joining, the connect link to a server will show up. Moreover, the replacement player will not have a skill value shown up next to their nickname in order to mark that this player was a sub and his skill did not count to a team skill calculations.
 
 ![request-substitute-free-spot](/img/content/common-tasks/request-substitute-after-joining.png)
+
+:::note
+A player who substitutes themselves out of a game faces the same queue join cooldown as any other queue action — they cannot immediately re-join the queue.
+:::

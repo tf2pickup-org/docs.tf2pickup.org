@@ -65,6 +65,26 @@ Here you can configure:
 - **Preferred region** — pick the region closest to your players. If a server from the preferred region is not available, another one will be used instead.
 - **Banned game server name patterns** — exclude servers whose names contain any of the listed patterns from being reserved.
 
+### tf2-quick-server integration
+
+[tf2-quick-server](https://tf2-quickserver.sonikro.com) is a cloud-based on-demand game server service. When configured, the pickup site can request a fresh game server from the service whenever a pickup starts, without requiring any locally hosted servers.
+
+To enable tf2-quick-server, add the following variables to your `.env` file:
+
+```env
+# tf2-quick-server integration (optional)
+TF2_QUICK_SERVER_CLIENT_ID=your_client_id
+TF2_QUICK_SERVER_CLIENT_SECRET=your_client_secret
+```
+
+Contact the tf2-quick-server team to obtain credentials. Once set, the integration status is shown in **Admin Panel → Game servers**. When reassigning a game server to a game, the server list will include a **TF2 Quick Server** section. You can either select an existing quick server that is already running, or choose **Create new server** and pick the region closest to your players.
+
+Available regions: São Paulo, Santiago, Bogotá, Chicago, Frankfurt, Sydney.
+
+:::info
+tf2-quick-server can be used alongside static servers and serveme.tf. The site uses whichever provider you select when assigning a server to a game.
+:::
+
 ## Add admins to the site, set up whitelist, maps and skills
 
 After the site start, you may want to add admins in order to make site moderation easier and faster. To do that, you have to open up the player profile, choose **roles** button and choose a right role for them:
