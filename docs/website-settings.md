@@ -17,6 +17,7 @@ Currently website settings lets you:
 - import player skill,
 - show site player skill table,
 - scramble maps available to vote at the moment,
+- review the activity log,
 - edit rules,
 - edit privacy policy.
 
@@ -210,6 +211,31 @@ If a player had a failed login attempt due to registration restrictions, let the
 ## Setting up player skills
 
 See [here](/docs/the-most-common-tasks#setting-up-player-skills).
+
+## Activity log
+
+The admin panel includes an **Activity log** — a paginated, filterable table that records significant administrative and game events on the site. Open it from the admin panel or directly at `/admin/activity-log`.
+
+The log tracks events such as:
+
+- player name changes (with the actor, when changed by an admin),
+- player skill changes (showing the before/after values),
+- configuration changes (only when a value actually changes — saving without a change records nothing),
+- bans added and revoked (with reason and expiry/revoke details),
+- map pool changes and map scrambles,
+- games reconfigured, game servers reassigned, and games force-ended,
+- substitute requests,
+- queue clears (showing how many players were removed).
+
+You can filter entries by **type**, **player**, and **actor**. The player and actor filters accept either a name search or a direct SteamID64. The current filter and sort state is kept in the page's query string, so you can share a link to a filtered view with other admins. Click the date column header to toggle the sort order.
+
+:::tip
+Each player's admin toolbox includes an **Activity log** link that opens the log pre-filtered to that player (`/admin/activity-log?player=<steamId>`).
+:::
+
+:::note
+Consecutive map scrambles by the same admin are merged into a single entry with a ×N counter to keep the log readable. Historical entries are backfilled from existing name history, skill history and game events the first time the feature runs, so the log is not empty on upgrade.
+:::
 
 ## Set up website rules
 

@@ -141,6 +141,12 @@ SERVEME_TF_API_KEY=your_serveme_tf_api_key
 # TF2_QUICK_SERVER_CLIENT_ID=your_client_id
 # TF2_QUICK_SERVER_CLIENT_SECRET=your_client_secret
 
+# atlas integration (optional)
+# Registers this instance on the atlas dashboard (https://atlas.tf2pickup.org).
+# Heartbeats are sent only when ATLAS_SECRET is set.
+# ATLAS_URL=https://atlas.tf2pickup.org
+# ATLAS_SECRET=your_atlas_secret
+
 ### Mumble Server Configuration
 # SuperUser account password
 MUMBLE_SUPERUSER_PASSWORD=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
@@ -294,6 +300,28 @@ Then, you will see the application list. Find `tf2pickup.eu` and select **Manage
 ![twitch-dev-console-api-settings](/img/content/site-components-deployment/twitch-dev-console-api-settings.png)
 
 Pass this secret value to the `TWITCH_CLIENT_SECRET` variable.
+
+### Registering on the atlas dashboard
+
+:::tip
+
+This step is optional. Follow it only if you want your instance to appear on the public [atlas.tf2pickup.org](https://atlas.tf2pickup.org) dashboard.
+
+:::
+
+[atlas.tf2pickup.org](https://atlas.tf2pickup.org) is a dashboard that lists all online _tf2pickup.org_ instances. Each registered instance is shown together with its name, address, application version, queue configuration, queue occupancy and the number of players currently online. A link to the dashboard is also available in the footer of every _tf2pickup.org_ instance.
+
+To register your instance, set the `ATLAS_SECRET` environment variable in your `.env` file. Once it is set, the instance sends an authenticated heartbeat to atlas at boot, every 3 minutes, and whenever the queue changes. If a heartbeat is not received for 12 hours, the instance is dropped from the dashboard.
+
+```env
+# atlas integration (optional)
+# Registers this instance on the atlas dashboard (https://atlas.tf2pickup.org).
+# Heartbeats are sent only when ATLAS_SECRET is set.
+# ATLAS_URL=https://atlas.tf2pickup.org
+ATLAS_SECRET=your_atlas_secret
+```
+
+`ATLAS_URL` defaults to `https://atlas.tf2pickup.org` and only needs to be set if you run your own atlas instance. The feature is fully optional — when `ATLAS_SECRET` is unset (the default), nothing is registered, and if atlas is unreachable the instance keeps working normally and only logs a warning.
 
 ### Mumble server setup
 
