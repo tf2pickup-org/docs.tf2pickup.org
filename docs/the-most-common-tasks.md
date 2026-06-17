@@ -137,6 +137,12 @@ Then navigate to the `Bans` tab and click `Add ban`.
 
 Define a ban reason and the ban length. You can define a ban length by the duration, end date or without due date, meaning someone is getting banned forever. Click `Save` after that.
 
+### Anonymous bans
+
+When adding a ban, you can tick the **Anonymous** checkbox. The banned player (and anyone else viewing the ban) will see it as issued by **&lt;your website name&gt; Staff** instead of your nickname. Admins still see who actually issued the ban — in the player's ban history, an anonymous ban is marked with an _(anonymous)_ label next to the real actor's name.
+
+Use this when you want to hand out a ban without exposing which individual admin issued it.
+
 ![ban-player-duration](/img/content/common-tasks/ban-player-duration.png)
 
 ![ban-player-enddate](/img/content/common-tasks/ban-player-enddate.png)

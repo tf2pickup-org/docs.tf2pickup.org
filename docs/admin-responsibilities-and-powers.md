@@ -14,6 +14,7 @@ They can:
 - manage the whitelist,
 - bypass registration restrictions for players,
 - scramble maps available in the votes,
+- review the [activity log](/docs/website-settings#activity-log) of administrative and game events,
 - edit static pages (like the rules page).
 
 They are supposed to:
