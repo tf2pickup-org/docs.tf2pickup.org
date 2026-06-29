@@ -17,6 +17,11 @@ They can:
 - review the [activity log](/docs/website-settings#activity-log) of administrative and game events,
 - edit static pages (like the rules page).
 
+Super-users additionally can:
+
+- [permanently delete a player profile](/docs/website-settings#deleting-a-player-profile) (irreversible),
+- control whether [server connect info is hidden from spectators](/docs/final-touches#hiding-server-info-from-spectators).
+
 They are supposed to:
 
 - consult actions if they are unsure if things what they want to do are fine (for example handing out bans, assigning skills to certain people, changing site elements such as map pool, rules or the whitelist),

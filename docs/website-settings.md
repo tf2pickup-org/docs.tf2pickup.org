@@ -18,6 +18,7 @@ Currently website settings lets you:
 - show site player skill table,
 - scramble maps available to vote at the moment,
 - review the activity log,
+- delete player profiles (super-users only),
 - edit rules,
 - edit privacy policy.
 
@@ -235,6 +236,27 @@ Each player's admin toolbox includes an **Activity log** link that opens the log
 
 :::note
 Consecutive map scrambles by the same admin are merged into a single entry with a ×N counter to keep the log readable. Historical entries are backfilled from existing name history, skill history and game events the first time the feature runs, so the log is not empty on upgrade.
+:::
+
+## Deleting a player profile
+
+:::warning
+This action is **irreversible**. There is no undo and no recycle bin — once a profile is deleted it cannot be restored.
+:::
+
+Super-users can permanently delete a player profile. Open it from the admin panel or directly at `/admin/delete-player`.
+
+Search for a player by name or SteamID64, then use the per-player card to delete them. To prevent mistakes, deletion requires typing the player's exact nickname or SteamID64 (validated on the server) and confirming a browser dialog.
+
+When a profile is deleted:
+
+- The player document is **hard-deleted**, so the profile page returns a 404 and the player disappears from the player list and the hall of fame.
+- Historical references in games, chat and the activity log are **anonymized** — the player's Steam ID is replaced with a `[deleted]` sentinel, and they render as a greyed-out "deleted user" with no profile link. Chat mentions (both the rendered link and the `@<id>` token) are scrubbed too.
+- **Player action logs keep the real Steam ID** for auditing. The profile link there becomes a dead link, but the Steam ID remains visible in its own column.
+- Live presence (online players, queue slots, friendships) is cleared so no live views break.
+
+:::note
+Super-users cannot be deleted. Their card shows "cannot be deleted", and the server re-enforces this even if the request is crafted manually.
 :::
 
 ## Set up website rules

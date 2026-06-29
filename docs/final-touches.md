@@ -85,6 +85,25 @@ Available regions: São Paulo, Santiago, Bogotá, Chicago, Frankfurt, Sydney.
 tf2-quick-server can be used alongside static servers and serveme.tf. The site uses whichever provider you select when assigning a server to a game.
 :::
 
+### Hiding server info from spectators
+
+SourceTV runs on the same machine (and therefore the same IP address) as the game server, so the SourceTV connect string shown to non-participants exposes the game server's address. This can be scraped and abused for DDoS attacks. To mitigate this, **Admin Panel → Game servers** includes a **Hide server info from spectators** setting with three modes:
+
+- **never** — show connect info to everyone (the previous behavior).
+- **auto** *(default)* — hide connect info only for non-serveme.tf servers. serveme.tf has built-in DDoS protection, so reservations there stay visible.
+- **always** — hide connect info for all servers.
+
+When connect info is hidden, non-participants see `hidden` instead of the SourceTV connect string, and the **watch stv** button is removed for them.
+
+The following always keep access to the real connect info, regardless of this setting:
+
+- **Match participants** — always see the real game connect string.
+- **Admins** (even when not playing in the game) — always see the SourceTV connect string and keep the **watch stv** button, since they are trusted and already have the full rcon connect string in the admin toolbox.
+
+:::note
+Because SourceTV shares the game server's IP, hiding the address from non-participants necessarily disables public SourceTV spectating for the affected servers while a game is live. There is no way to keep public STV available while still hiding the address.
+:::
+
 ## Add admins to the site, set up whitelist, maps and skills
 
 After the site start, you may want to add admins in order to make site moderation easier and faster. To do that, you have to open up the player profile, choose **roles** button and choose a right role for them:
