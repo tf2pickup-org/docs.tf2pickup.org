@@ -41,7 +41,7 @@
   "overrides": {
     "webpackbar": "7.0.0",
     "follow-redirects": "1.16.0",
-    "ws": "8.21.0",
+    "ws": "8.21.1",
     "@babel/plugin-transform-modules-systemjs": "8.0.1",
     "node-forge": "1.4.0",
     "fast-uri": "4.1.0",
