@@ -245,6 +245,10 @@ server {
         ssl_stapling_verify on;
         ssl_session_cache shared:ssl_session_cache:10m;
         ssl_trusted_certificate /etc/letsencrypt/live/tf2pickup.eu/chain.pem;
+        location ~* (\.php\d?$|\.aspx?$|\.jsp$|\.cgi$|\.env$|\.bak$|\.old$|\.sql$|^/wp-|^/wordpress|^/\.git|^/phpmyadmin|^/cgi-bin|^/config/) {
+                access_log off;
+                return 444;
+        }
         location / {
                 proxy_pass http://127.0.0.1:3000;
                 add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload";
@@ -257,6 +261,10 @@ server {
                 }
 }
 ```
+
+:::tip
+The `return 444` location block drops requests for paths that only automated vulnerability scanners ask for (PHP files, WordPress paths, `.git`, backup/config files) before they ever reach the application. `444` is an Nginx-specific status that closes the connection without sending a response, so scanners get nothing to fingerprint and your application logs stay free of scanner-generated 404s. Since tf2pickup is a Node.js application, none of these paths are ever legitimate.
+:::
 
 After placing the file, make sure to create a symlink to it in `/etc/nginx/sites-enabled`:
 
