@@ -47,7 +47,7 @@
     "fast-uri": "4.1.2",
     "brace-expansion": "5.0.9",
     "qs": "6.15.3",
-    "uuid": "14.0.1",
+    "uuid": "14.0.2",
     "postcss": "8.5.26",
     "serialize-javascript": "7.1.0"
   }
