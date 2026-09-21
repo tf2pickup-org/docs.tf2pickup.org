@@ -5,10 +5,14 @@ module.exports = {
   url: 'https://docs.tf2pickup.org',
   baseUrl: '/',
   onBrokenLinks: 'throw',
-  onBrokenMarkdownLinks: 'warn',
   favicon: 'img/favicon.ico',
   organizationName: 'tf2pickup.org',
   projectName: 'docs.tf2pickup.org',
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: 'warn',
+    }
+  },
   themeConfig: {
     navbar: {
       title: 'tf2pickup.org',
