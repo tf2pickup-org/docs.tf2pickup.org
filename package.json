@@ -49,6 +49,6 @@
     "qs": "6.16.0",
     "uuid": "14.0.2",
     "postcss": "8.5.28",
-    "serialize-javascript": "7.1.1"
+    "serialize-javascript": "7.1.2"
   }
 }
