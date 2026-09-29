@@ -8,6 +8,127 @@ Before doing any migration **back up your database** in case the whole process g
 
 :::
 
+## Merging two instances
+
+Since multiple queues landed, one tf2pickup.org instance can host several gamemodes. If you run two instances today (for example `tf2pickup.eu` for 6v6 and `hl.tf2pickup.eu` for 9v9), you can merge one into the other with a script that ships in the Docker image.
+
+The instance you keep is the **primary** one. The one you fold into it is the **incoming** one.
+
+### What gets merged
+
+- **Queues** are matched by name (`auto-9v9`, `auto-6v6`, …). The incoming instance's queue, with its settings and map pool, is enabled on the primary.
+- **Games** keep the primary's numbering: the incoming games are renumbered to continue after the primary's last game. Old game links keep working (see [Keep old game links working](#keep-old-game-links-working)).
+- **Players** are matched by their Steam ID. Their skill, ELO and game counts from both instances are kept per gamemode, and so are their bans, chat mutes and history.
+- **Game logs, logs.tf links, player actions, chat and the activity log** come along too.
+- **Admin panel settings**: only the incoming instance's default player skill and whitelist carry over, as its gamemode's settings. Everything else is the primary's.
+
+What does **not** come over:
+
+- **Roles.** A player known only to the incoming instance arrives without roles. A player on both keeps their primary roles. Re-grant admin roles to the incoming instance's staff after the merge.
+- **Game servers**, Discord, Twitch, rules, privacy policy and other admin panel settings of the incoming instance. Set up anything you still need on the primary.
+
+### Before you start
+
+- **Rehearse first.** Restore both backups into a spare MongoDB and run the whole procedure there, including `--dry-run`, before you touch production.
+- Plan for **downtime** on both instances.
+- **Back up both databases.**
+
+### 1. Upgrade both instances to the same version
+
+The script refuses to run unless both databases are on the same version. Upgrade both instances to the same release (one with multiple queues), start each one once so it migrates its database, and then stop them:
+
+```sh
+docker compose pull tf2pickup
+docker compose up -d tf2pickup
+# wait until the site is up, then:
+docker compose stop tf2pickup
+```
+
+:::caution
+
+The first start on a multi-queue version turns `QUEUE_CONFIG` into that instance's queue and tags all its past games with that gamemode. Make sure `QUEUE_CONFIG` is set correctly on **each** instance (e.g. `6v6` on the primary, `9v9` on the incoming one) before this step.
+
+:::
+
+Both instances must also have **no game in progress**. The script checks this and refuses to run otherwise.
+
+### 2. Copy the incoming database next to the primary
+
+The script needs to reach both databases. The simplest way is to restore the incoming database into the primary's MongoDB under a different name:
+
+```sh
+# on the incoming instance's host
+docker compose exec -T mongo mongodump --uri="$INCOMING_MONGODB_URI" --archive --gzip > incoming.dump.gz
+
+# on the primary instance's host
+docker compose exec -T mongo mongorestore --uri="$PRIMARY_MONGODB_SERVER_URI" --archive --gzip \
+  --nsFrom='tf2pickup.*' --nsTo='tf2pickup-hl.*' < incoming.dump.gz
+```
+
+Replace `tf2pickup` with the database name from the incoming instance's `MONGODB_URI`. `$PRIMARY_MONGODB_SERVER_URI` is the primary's `MONGODB_URI` without the database name.
+
+### 3. Do a dry run
+
+Run the script from the primary's image, pointing it at both databases and at the incoming instance's domain. `--dry-run` only reports what it would do:
+
+```sh
+docker compose run --rm \
+  -e MERGE_PRIMARY_URI='mongodb://tf2pickup:password@mongo/tf2pickup' \
+  -e MERGE_INCOMING_URI='mongodb://tf2pickup:password@mongo/tf2pickup-hl?authSource=tf2pickup' \
+  -e MERGE_SOURCE_HOST=hl.tf2pickup.eu \
+  tf2pickup node dist/src/merge-instances/run.js --dry-run
+```
+
+| Variable | Description |
+|----------|-------------|
+| `MERGE_PRIMARY_URI` | MongoDB URI of the primary instance's database (usually its `MONGODB_URI`). |
+| `MERGE_INCOMING_URI` | MongoDB URI of the incoming instance's database. |
+| `MERGE_SOURCE_HOST` | The incoming instance's domain, without `https://`. Old game links are redirected by it. |
+
+The MongoDB user in these URIs needs access to both databases.
+
+The output looks like this:
+
+```
+[merge] (dry run) queue auto-9v9: takes the incoming settings and maps, and gets enabled
+[merge] (dry run) games: 5034 + 2815, the incoming ones renumbered from 5035
+[merge] (dry run) games.roundprogress: 0 incoming
+[merge] (dry run) games.substituterequests: 0 incoming
+[merge] (dry run) games.deferredkicks: 0 incoming
+[merge] (dry run) logstf.logs: 2660 incoming
+[merge] (dry run) activitylog: 3005 incoming
+[merge] (dry run) players: 529 merged, 710 added
+[merge] (dry run) configuration: games.default_player_skill, games.gamemode_whitelist_ids
+[merge] (dry run) no changes made
+```
+
+Check that the queues, game numbers and player counts are what you expect.
+
+### 4. Merge
+
+Run the same command without `--dry-run`. It should end with `[merge] done`. On a real-world pair of instances (~7,800 games, ~2,200 players) it takes well under a minute.
+
+The script can only merge a given domain once. Running it again with the same `MERGE_SOURCE_HOST` is refused, so if something goes wrong, restore the primary from its backup and start over.
+
+### 5. Start the primary
+
+```sh
+docker compose up -d tf2pickup
+```
+
+Both queues should now appear at the top of the queue page. Then:
+
+- re-grant admin roles to the incoming instance's staff,
+- add the incoming instance's game servers, if you still want to use them,
+- once you're done, drop the `tf2pickup-hl` database from the primary's MongoDB and shut the incoming instance down.
+
+### Keep old game links working
+
+Links to the incoming instance's games, like `https://hl.tf2pickup.eu/games/42`, keep working in two ways:
+
+- **Keep the old domain.** Point it at the primary: add it to the primary's `server_name` in your [reverse proxy](#reverse-proxy) and keep its certificate. `https://hl.tf2pickup.eu/games/42` then redirects to the game's new number.
+- **Retire the old domain.** `https://tf2pickup.eu/games/42?i=hl.tf2pickup.eu` redirects to the game's new number. Use it to rewrite old links, e.g. from your Discord.
+
 ## Version 4
 
 Version 4 is a complete rewrite of tf2pickup.org. The previously separate [client](https://github.com/tf2pickup-org/client) and [server](https://github.com/tf2pickup-org/server) repositories have been merged into a single [monolith](https://github.com/tf2pickup-org/tf2pickup). This simplifies deployment significantly — there is now only one Docker image and one application port.
