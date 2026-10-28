@@ -43,7 +43,7 @@
     "follow-redirects": "1.16.2",
     "ws": "8.22.0",
     "@babel/plugin-transform-modules-systemjs": "8.0.1",
-    "node-forge": "1.4.1",
+    "node-forge": "1.4.2",
     "fast-uri": "4.2.3",
     "brace-expansion": "5.0.12",
     "qs": "6.17.0",
