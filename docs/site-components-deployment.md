@@ -176,6 +176,10 @@ MUMBLE_CONFIG_SSL_KEY=/certs/privkey.pem
 # which will be used as the default Diffie-Hellman parameters for all virtual servers.
 # If a file is not specified, each Murmur virtual server will auto-generate its own unique set of 2048-bit Diffie-Hellman parameters on first launch.
 MUMBLE_CONFIG_SSLDHPARAMS=@ffdhe4096
+# How many messages a client can send in a burst, and how many per second after that.
+# Raise these if you use Mumble player verification, so the bot's permission updates don't time out.
+MUMBLE_CONFIG_MESSAGEBURST=50
+MUMBLE_CONFIG_MESSAGELIMIT=10
 # Specifies a percentage of users on the server supporting the Opus codec before the entire server mandates Opus is used. 
 # It defaults to 100, so that any non-Opus supporting client connecting will cause the entire server to fall back to CELT.
 MUMBLE_CONFIG_OPUSTHRESHOLD=0
@@ -341,6 +345,8 @@ The channel edit window should look like this:
 ![mumble-edit-channel-window](/img/content/site-components-deployment/mumble-channel-edit-window.png)
 
 Press _OK_ to save the changes. The bot is supposed to create channels automatically when a game starts on the website. It will create BLU/RED subchannels in it as well. At the end of the game it will link BLU and RED channels, so both teams can communicate. The bot removes leftover channels after a game ends, provided they are empty of users.
+
+The Voice server page in the admin panel lists the permissions the bot needs and whether it has them. If you also want the bot to verify players and keep each game's channels to its own players, see [Mumble player verification](/docs/mumble-verification).
 
 ## `gameserver_1.env`
 
