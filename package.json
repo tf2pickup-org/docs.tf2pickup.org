@@ -50,5 +50,8 @@
     "uuid": "14.0.3",
     "postcss": "8.5.32",
     "serialize-javascript": "7.1.4"
+  },
+  "allowScripts": {
+    "core-js@3.33.2": true
   }
 }
