@@ -18,15 +18,13 @@ Go to the **Voice server** page in the admin panel and turn on **Verify players 
 
 Under the Mumble connection status, the **What the bot is allowed to do** list shows every permission the bot needs, and whether it has it. The first two are needed in any case; the rest show up once **Verify players automatically** is on, so turn it on first to see the full list.
 
-| What the bot does                    | Mumble permission | Where                 | Needed for          |
-| ------------------------------------ | ----------------- | --------------------- | ------------------- |
-| Join the games channel               | Enter             | games channel         | always              |
-| Create channels                      | Make channel      | games channel         | always              |
-| Change who can join a channel        | Write ACL         | games channel         | player verification |
-| Move players between channels        | Move              | games channel         | player verification |
-| Message players                      | Text message      | games channel         | player verification |
-| Register admins                      | Register User     | root channel          | player verification |
-| See players' IP addresses            | Ban               | root channel          | player verification |
+| What the bot does         | Mumble permission | Where         | Needed for          |
+| ------------------------- | ----------------- | ------------- | ------------------- |
+| Join the games channel    | Enter             | games channel | always              |
+| Create channels           | Make channel      | games channel | always              |
+| Manage game channels      | Write ACL         | games channel | player verification |
+| Register admins           | Register User     | root channel  | player verification |
+| See players' IP addresses | Ban               | root channel  | player verification |
 
 The _games channel_ is the one set in the **Channel name** field on the Voice server page. The _root channel_ is the top-level channel of your Mumble server.
 
