@@ -6,9 +6,7 @@ By default the tf2pickup.org bot only creates the Mumble channels for every game
 
 Automatic player verification lets the bot take care of that. It recognizes players by their Mumble certificate and only lets a game's players into its channels, and each team into its own team channel.
 
-:::caution
-Automatic player verification is being rolled out in stages. You can already turn it on and check the bot's permissions, but verifying players and restricting channels will arrive in upcoming releases. This page will be updated as they land.
-:::
+For what players see and do, see [Joining Mumble game channels](/docs/mumble-for-players).
 
 ## Turning it on
 

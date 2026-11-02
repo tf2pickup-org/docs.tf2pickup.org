@@ -18,6 +18,7 @@ module.exports = {
         'the-most-common-tasks',
         'website-settings',
         'player-settings',
+        'mumble-for-players',
         'player-registration-issues',
       ],
     },
