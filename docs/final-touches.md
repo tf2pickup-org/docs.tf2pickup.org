@@ -131,6 +131,7 @@ These settings can be set by superusers only. There are three options to set it 
   - Port - port used by the Mumble server
   - Password (optional) - password needed to log onto the Mumble server
   - Channel name - defines the parent channel for the pickups
+  - Verify players automatically - lets the bot verify players by their Mumble certificate and only let a game's players into its channels, see [Mumble player verification](/docs/mumble-verification)
 
 For more details about Mumble bot setup, check [this](/docs/site-components-deployment#mumble-server-setup).
 
