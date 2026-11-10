@@ -68,84 +68,107 @@ Then, these are the templates for the aforementioned files:
 ## `.env`
 
 ```env
-# Timezone of the server
-# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-TZ=Europe/Warsaw
-
-NODE_ENV=production
-
-# Logging level
-# Possible values: fatal, error, warn, info, debug, trace
-LOG_LEVEL=info
+#
+# Required: change these before the first launch
+#
 
 # An URL to where this instance will be accessed
 WEBSITE_URL=https://tf2pickup.eu
 
-# The name of the website
-WEBSITE_NAME=tf2pickup.eu
-
 # MongoDB connect string
 MONGODB_URI=mongodb://tf2pickup:yoursuperfunnypassword@mongo/tf2pickup
-
-# logs.tf API key
-# Obtain yours here: https://logs.tf/uploader
-LOGS_TF_API_KEY=your_logs_tf_api_key
-
-# Used to authenticate and add servers to the serverlist.
-GAME_SERVER_SECRET=yoursuperfunnygameserversecret
 
 # Steam API key
 # Get your key at https://steamcommunity.com/dev/apikey
 STEAM_API_KEY=1234567890ABCDEF1234567890ABCDEF
 
-# A passphrase that is used to encrypt private keys that sign JWT tokens.
-# NOTE: For production, get a random password (i.e. from https://passwordsgenerator.net/)
-# and do not change it afterwards.
-KEY_STORE_PASSPHRASE=XDXDXDXDXDXDXDXDXD
-
-# SteamID of the super-user
-# NOTE: Use the SteamID64 format.
+# SteamID64 of the super-user
 SUPER_USER=76561198011558250
 
-# Which gamemode to run; possible values: 6v6, 9v9, bball, ultiduo
-QUEUE_CONFIG=6v6
+# A passphrase that is used to encrypt private keys that sign JWT tokens.
+# For production, use a long random password and do not change it afterwards.
+KEY_STORE_PASSPHRASE=XDXDXDXDXDXDXDXDXD
+
+# Used by the connector plugin to register static game servers.
+GAME_SERVER_SECRET=yoursuperfunnygameserversecret
 
 # Log relay
-# The log relay uses one UDP port to receive logs from the TF2 game servers. These are used
-# to determine when the match starts, ends, when users connect, etc.
-# It should be the public address of the server, including the port.
-LOG_RELAY_ADDRESS=tf2pickup.eu:3000
+# A UDP endpoint the TF2 game servers send their logs to. The address must be
+# reachable by the game servers: your public hostname or IP (no port, no schema).
+LOG_RELAY_ADDRESS=tf2pickup.eu
 LOG_RELAY_PORT=9871
 
-# Discord (optional)
+#
+# Recommended: review these
+#
+
+# The name of the website
+WEBSITE_NAME=tf2pickup.eu
+
+# Which gamemode to run; possible values: 6v6, 9v9, ultiduo
+QUEUE_CONFIG=6v6
+
+# Timezone of the server
+# https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+TZ=Europe/Warsaw
+
+# logs.tf API key, enables uploading match logs
+# Obtain yours here: https://logs.tf/uploader
+LOGS_TF_API_KEY=your_logs_tf_api_key
+
+#
+# Optional integrations: leave empty to disable
+#
+
+# Custom logos and favicons, see https://docs.tf2pickup.org/docs/custom-branding
+WEBSITE_BRANDING=
+
+# serveme.tf
+# Valid endpoints are: serveme.tf, na.serveme.tf, sea.serveme.tf
+# Grab your serveme.tf key here: https://serveme.tf/settings
+SERVEME_TF_API_ENDPOINT=serveme.tf
+SERVEME_TF_API_KEY=your_serveme_tf_api_key
+
+# TF2 Quick Server
+# Contact the tf2-quick-server team to obtain credentials.
+TF2_QUICK_SERVER_CLIENT_ID=
+TF2_QUICK_SERVER_CLIENT_SECRET=
+
+# Discord
 # You will find a bot token at https://discord.com/developers/applications
 DISCORD_BOT_TOKEN=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDXDX
 
-# twitch.tv integration (optional)
+# twitch.tv
 # https://dev.twitch.tv/console, while setting up a new app,
 # use OAuth Redirect URL: https://tf2pickup.eu/twitch/auth/return
 TWITCH_CLIENT_ID=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
 TWITCH_CLIENT_SECRET=XDXDXDXDXDXDXDXDXDXDXDXDXDXDXD
 
-# serveme.tf integration (optional)
-# valid endpoints are:
-# serveme.tf
-# na.serveme.tf
-# sea.serveme.tf
-SERVEME_TF_API_ENDPOINT=serveme.tf
-# Grab your serveme.tf key here: https://serveme.tf/settings
-SERVEME_TF_API_KEY=your_serveme_tf_api_key
+# umami analytics
+# https://umami.is/docs/self-host
+UMAMI_SCRIPT_SRC=
+UMAMI_WEBSITE_ID=
+UMAMI_RECORDER_SCRIPT_SRC=
+UMAMI_TRACK_PERFORMANCE=false
 
-# tf2-quick-server integration (optional)
-# Contact the tf2-quick-server team to obtain credentials.
-# TF2_QUICK_SERVER_CLIENT_ID=your_client_id
-# TF2_QUICK_SERVER_CLIENT_SECRET=your_client_secret
+# atlas dashboard (https://atlas.tf2pickup.org)
+ATLAS_SECRET=
 
-# atlas integration (optional)
-# Registers this instance on the atlas dashboard (https://atlas.tf2pickup.org).
-# Heartbeats are sent only when ATLAS_SECRET is set.
-# ATLAS_URL=https://atlas.tf2pickup.org
-# ATLAS_SECRET=your_atlas_secret
+#
+# Defaults are fine: uncomment to override
+#
+
+# Possible values: fatal, error, warn, info, debug, trace
+#LOG_LEVEL=info
+
+# Reverse-proxy addresses whose X-Forwarded-* headers are trusted when resolving
+# the real client IP. Comma-separated IPs/CIDRs or named subnets (loopback,
+# linklocal, uniquelocal). Set to the exact proxy address to tighten further.
+#TRUST_PROXY=loopback, uniquelocal
+
+# Anonymous feature-adoption telemetry, sent in production only.
+# No player data, server names, URLs or tokens are sent.
+#TELEMETRY_DISABLED=false
 
 ### Mumble Server Configuration
 # SuperUser account password
