@@ -69,7 +69,7 @@ Several environment variables have changed:
 
 | Variable | What changed |
 |----------|-------------|
-| `LOG_RELAY_ADDRESS` | Was the API hostname (e.g. `api.tf2pickup.eu`). Now should be set to your public hostname and port (e.g. `tf2pickup.eu:3000`). |
+| `LOG_RELAY_ADDRESS` | Was the API hostname (e.g. `api.tf2pickup.eu`). Now should be set to your public hostname, without the port (e.g. `tf2pickup.eu`); the port is taken from `LOG_RELAY_PORT`. |
 
 #### Unchanged
 
