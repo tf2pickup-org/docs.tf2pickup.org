@@ -6,8 +6,9 @@ title: Website settings
 
 Currently website settings lets you:
 
+- manage queues,
 - configure game servers (including serveme.tf server preferences),
-- configure map pool,
+- configure each queue's map pool,
 - configure game settings,
 - configure default player skill,
 - configure player restrictions,
@@ -16,7 +17,7 @@ Currently website settings lets you:
 - bypass registration restrictions,
 - import player skill,
 - show site player skill table,
-- scramble maps available to vote at the moment,
+- scramble a queue's map vote options,
 - review the activity log,
 - delete player profiles (super-users only),
 - edit rules,
@@ -24,13 +25,34 @@ Currently website settings lets you:
 
 ![admin-panel](/img/content/overview/admin-panel.png)
 
+## Managing queues
+
+Since version 5, one instance can run several queues. A queue is a gamemode (6v6, 9v9, bball or ultiduo) plus its own settings, so two queues can share a gamemode, for example a 6v6 queue open to everyone and a restricted 6v6 queue. Each queue has its own page at `/q/<slug>`, and the front page shows the default queue.
+
+Go to **Admin panel → Queues** to:
+
+- **add a queue.** Start from a template (for example `6v6` or `9v9 (restricted)`) or from a blank queue, then pick a slug and a name. The slug is the queue's address (`/q/<slug>`) and can't be changed later. The gamemode can't be changed later either.
+- **enable or disable a queue.** At least one queue must stay enabled. Only disabled queues can be deleted.
+- **reorder queues.** The first enabled queue is the default one, shown on the front page and served by `GET /api/v1/queue`.
+
+Click a queue's name to edit its settings:
+
+- **Name**: shown in the queue switcher and on Discord.
+- **Require player verification**: admins must verify each player before they can join this queue. See [Configuring player restrictions](#configuring-player-restrictions).
+- **Player skill threshold**: players can join this queue only on classes where their skill meets the threshold. Only for skill-balanced gamemodes (6v6 and 9v9).
+- **Ready-up timeout** and **ready state timeout**: how long players have to ready up before they are kicked out of the queue, and how long the queue stays in the ready-up state.
+- **Map cooldown**: how many games have to be played before a map can be voted for again.
+- **Whitelist ID**: the TF2 server whitelist for this queue's games. If it's empty, the gamemode's whitelist is used, then the global one (see [Server whitelist](#server-whitelist)).
+
+The map pool and scramble maps pages have a tab for each queue.
+
 ## Configuring game servers
 
 See [here](/docs/final-touches#adding-game-servers-to-the-website).
 
 ## Map pool settings
 
-You can configure as much maps as you want to. You have to make sure the map is placed in the `maps` folder in the game servers, so they will be able to start the map. Values on left are map names without `.bsp` extension file and values on right are config names placed in the `cfg` folder (at the moment only ETF2L configs are available).
+Each queue has its own map pool; pick the queue's tab at the top of the page. You can configure as much maps as you want to. You have to make sure the map is placed in the `maps` folder in the game servers, so they will be able to start the map. Values on left are map names without `.bsp` extension file and values on right are config names placed in the `cfg` folder (at the moment only ETF2L configs are available).
 
 ![set-map-pool](/img/content/website-settings/set-map-pool.png)
 
@@ -49,6 +71,8 @@ Here you can set up:
 ### Server whitelist
 
 You can set up a whitelist by defining a whitelist name or its ID from [whitelist.tf](https://whitelist.tf). If not defined, all items will be available on the pickup games.
+
+You can set a global whitelist and one per gamemode. A game uses its queue's whitelist (see [Managing queues](#managing-queues)), then its gamemode's, then the global one.
 
 ### Join gameserver timeout
 
@@ -86,15 +110,16 @@ Defines a logs.tf upload method, where available options are:
 
 ## Configuring default player skill
 
-See [here](/docs/the-most-common-tasks#defining-default-skill-values).
+Default skill is set per gamemode. See [here](/docs/the-most-common-tasks#defining-default-skill-values).
 
 ## Configuring player restrictions
 
 Since not all regions of the world participate in ETF2L or have a profile created there, this option allows you to:
 
 - enable/disable user validation against the [ETF2L API](https://api-v2.etf2l.org),
-- define minimum TF2 in-game time spent in order to register to the website,
-- require player verification to join the queue.
+- define minimum TF2 in-game time spent in order to register to the website.
+
+Player verification is set per queue, in the queue's settings (see [Managing queues](#managing-queues)).
 
 The ETF2L user validation lets website:
 
@@ -112,7 +137,7 @@ In order to change the requirement, simply click on it, define a new amount of h
 
 ![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
-If **Require player verification** is enabled, admins must manually verify each player before they can join the queue. Unverified players will see the queue join buttons disabled. Admins can verify a player directly from their profile page using the **Player verified** checkbox in the admin toolbox.
+If **Require player verification** is enabled on a queue, admins must manually verify each player before they can join that queue. Unverified players will see the queue join buttons disabled. Admins can verify a player directly from their profile page using the **Player verified** checkbox in the admin toolbox.
 
 When a player's verification status changes, a notification is sent to the Discord admin channel (green embed for verified, orange for revoked).
 
@@ -169,19 +194,7 @@ Allows specifying the amount of cooldown levels as well as the ban length in mil
 ]
 ```
 
-### Setting map cooldown
-
-By default, after map is being picked to a next pickup game, it is excluded for the next two games from being available as a vote option. Changing this settings overrides the cooldown given for the map choice. Should be provided as an integer.
-
-### Setting up ready state timeout
-
-Defines time in milliseconds (default: `60000`) given for all players to click the button as an indication to be ready to play a game. Should be provided as an integer.
-
-### Setting up ready up timeout
-
-:::warning
-Changing this variable is unsupported. Restart your application in order to apply the change.
-:::
+Map cooldown, ready-up timeout and ready state timeout are queue settings since version 5. See [Managing queues](#managing-queues).
 
 ### Excluding specific serveme.tf gameservers
 

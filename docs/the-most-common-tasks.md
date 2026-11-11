@@ -6,7 +6,7 @@ Here you can find a list of the tasks admins perform on the site:
 
 ## Clearing the queue
 
-If you need to reset the queue instantly — for example during a test, or when players are unresponsive — use the **Clear queue** button in the queue header. This button is only visible to admins.
+If you need to reset a queue instantly — for example during a test, or when players are unresponsive — use the **Clear queue** button in the queue header. This button is only visible to admins.
 
 Clicking it will ask for confirmation before proceeding. Once confirmed, all players are removed from their queue slots. A notification is sent to the admin Discord channel with your name and the number of players removed. The map vote and queue state are preserved.
 
@@ -14,7 +14,7 @@ Clicking it will ask for confirmation before proceeding. Once confirmed, all pla
 
 ## Scramble maps
 
-You may want to scramble the maps if one of the maps is played too often. You can do so by clicking this button in the Admin panel:
+You may want to scramble the maps if one of the maps is played too often. You can do so by picking the queue's tab and clicking this button in the Admin panel:
 
 ![scramble-maps](/img/content/common-tasks/scramble-maps.png)
 
@@ -111,13 +111,13 @@ When you hover over a player's name in a queue slot, a tooltip shows their skill
 
 ### Defining default skill values
 
-Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class, and save.
+Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class of each gamemode, and save. Only gamemodes that one of your queues uses and that balance teams by skill (6v6 and 9v9) are listed; bball and ultiduo teams are random, so they have no skill.
 
 ![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
 ### Reviewing skill values
 
-You can export all player skills as a CSV file from the admin panel under `Skill import/export`. This lets you review and edit skill values in a spreadsheet application.
+You can export player skills as a CSV file from the admin panel under `Skill import/export`, one gamemode at a time. This lets you review and edit skill values in a spreadsheet application.
 
 ![skill-table](/img/content/common-tasks/skill-table.png)
 
