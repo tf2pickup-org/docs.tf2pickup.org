@@ -107,7 +107,9 @@ KEY_STORE_PASSPHRASE=XDXDXDXDXDXDXDXDXD
 # NOTE: Use the SteamID64 format.
 SUPER_USER=76561198011558250
 
-# Which gamemode to run; possible values: 6v6, 9v9, bball, ultiduo
+# The gamemode of an instance upgraded from version 4; possible values: 6v6, 9v9, bball, ultiduo
+# Read only on the first start of version 5, which turns it into the instance's queue.
+# Queues are managed in the admin panel after that.
 QUEUE_CONFIG=6v6
 
 # Log relay
