@@ -93,13 +93,13 @@ See [here](/docs/the-most-common-tasks#defining-default-skill-values).
 Since not all regions of the world participate in ETF2L or have a profile created there, this option allows you to:
 
 - enable/disable user validation against the [ETF2L API](https://api-v2.etf2l.org),
+- sync bans from ETF2L.org,
 - define minimum TF2 in-game time spent in order to register to the website,
 - require player verification to join the queue.
 
 The ETF2L user validation lets website:
 
 - Assign an ETF2L profile to the tf2pickup.org profile.
-- Block player registration if the player is blacklisted/banned from the ETF2L.
 - Assign the nickname to a player (without it, the current nickname on steam is assigned to a tf2pickup.org profile).
 
 This switch lets you toggle the ETF2L profile validation check, according to your needs.
@@ -117,6 +117,30 @@ If **Require player verification** is enabled, admins must manually verify each 
 When a player's verification status changes, a notification is sent to the Discord admin channel (green embed for verified, orange for revoked).
 
 If **Skill suggestions** is enabled (experimental, on by default), the admin toolbox on player profile pages shows arrows next to class skill inputs when a player's in-game performance consistently suggests their manually-set skill may be miscalibrated. See [Skill suggestions](/docs/the-most-common-tasks#skill-suggestions-experimental) for details.
+
+### Syncing ETF2L.org bans
+
+Enable **Sync ETF2L.org bans** in `Player restrictions` and click `Save` to apply league bans to your pickup site. This option is off by default and works independently of **Require ETF2L account**. It also prevents players from registering while they have an active ETF2L ban that matches your reason list.
+
+The **ETF2L.org ban reasons** field contains one substring per line. Matching is case-insensitive: `cheating` matches `Cheating (Mirror)`, for example. Blank lines and surrounding spaces are ignored. Leave the field empty to mirror every active ban, regardless of its reason.
+
+The default reasons are:
+
+```text
+cheating
+aimbot
+triggerbot
+wallhack
+alting
+banned game modifications
+game ban
+```
+
+Matching bans appear in the player's ban history as bot-issued bans, with `ETF2L.org:` before the reason. They have the same effect as local bans: the player is kicked from the queue, sees the ban notification, and the usual Discord notification is sent when Discord is configured. The ban lasts as long as the ETF2L ban.
+
+New bans are checked once a day, starting 24 hours after the site starts. Player profile syncs can pick up bans sooner. There is no historical backfill of the league's ban list; an older active ban can still be picked up when that player's ETF2L profile is synced. The same daily check also re-checks every player with an active synced ban, so changes to those bans, including bans lifted by ETF2L, are picked up within a day.
+
+The reason filter applies when a ban is first mirrored. Changing the list does not remove bans that have already been mirrored. Turning synchronization off stops new checks and updates, but leaves existing bans in place. To override a particular ban permanently, [revoke the synced ban](/docs/the-most-common-tasks#synced-bans).
 
 ## Configuring voice server settings
 
