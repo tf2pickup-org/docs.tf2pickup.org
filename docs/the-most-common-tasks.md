@@ -159,6 +159,14 @@ Revoking a ban on a player is pretty easy. All you have to do is to click the re
 
 ![player-bans-menu](/img/content/common-tasks/player-bans-menu.png)
 
+### Synced bans
+
+When [ETF2L.org ban synchronization](/docs/website-settings#syncing-etf2lorg-bans) is enabled, matching league bans appear in the player's `Bans` tab as issued by the bot. The reason starts with `ETF2L.org:` and a **synced from ETF2L.org** badge identifies the source. When the player has a linked ETF2L profile, the badge links to it.
+
+Revoke a synced ban with the same revoke button used for local bans. It then shows **revoked locally**. This override is permanent for that particular ban: later profile syncs and the daily check will not re-apply it, even if the ETF2L ban is extended. Other ETF2L bans can still be mirrored.
+
+If a league ban is preventing a new player from registering, adding their SteamID64 to the [bypass list](/docs/website-settings#bypass-registration-restrictions) is an alternative to changing the site-wide restrictions. The bypass list only skips registration checks; revoke any mirrored ban separately to let the player join the queue.
+
 ## Subbing out players
 
 :::important

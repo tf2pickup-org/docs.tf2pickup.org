@@ -6,7 +6,9 @@ Below you can find more details for problems that may occur upon player registra
 
 ## ETF2L account is banned or blacklisted
 
-If tf2pickup.org site enforces having a registered ETF2L account, they cannot be banned or blacklisted, otherwise player registration will fail.
+When **Sync ETF2L.org bans** is enabled, registration fails if the player has an active ETF2L ban whose reason matches the site's configured reason list. Matching is case-insensitive and uses substrings; an empty list matches every ban. See [Syncing ETF2L.org bans](/docs/website-settings#syncing-etf2lorg-bans).
+
+This check is independent of **Require ETF2L account**. Requiring an ETF2L account alone does not block banned players when ban synchronization is off. Admins can allow registration through the [bypass list](/docs/website-settings#bypass-registration-restrictions), but this does not exempt an existing player from later ban synchronization.
 
 ## ETF2L account does not exist
 
