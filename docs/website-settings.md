@@ -138,7 +138,7 @@ game ban
 
 Matching bans appear in the player's ban history as bot-issued bans, with `ETF2L.org:` before the reason. They have the same effect as local bans: the player is kicked from the queue, sees the ban notification, and the usual Discord notification is sent when Discord is configured. The ban lasts as long as the ETF2L ban.
 
-New bans are checked once a day, starting 24 hours after the site starts. Player profile syncs can pick up bans sooner. There is no historical backfill of the league's ban list; an older active ban can still be picked up when that player's ETF2L profile is synced. Changes to already mirrored bans, including bans lifted by ETF2L, are picked up automatically when the player's profile syncs.
+New bans are checked once a day, starting 24 hours after the site starts. Player profile syncs can pick up bans sooner. There is no historical backfill of the league's ban list; an older active ban can still be picked up when that player's ETF2L profile is synced. The same daily check also re-checks every player with an active synced ban, so changes to those bans, including bans lifted by ETF2L, are picked up within a day.
 
 The reason filter applies when a ban is first mirrored. Changing the list does not remove bans that have already been mirrored. Turning synchronization off stops new checks and updates, but leaves existing bans in place. To override a particular ban permanently, [revoke the synced ban](/docs/the-most-common-tasks#synced-bans).
 
