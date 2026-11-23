@@ -33,7 +33,7 @@ The instance you keep is the **primary** one. The one you fold into it is the **
 - **Games** keep the primary's numbering: the incoming games are renumbered to continue after the primary's last game. Old game links keep working (see [Keep old game links working](#keep-old-game-links-working)).
 - **Players** are matched by their Steam ID. Their skill, ELO and game counts from both instances are kept per gamemode, and so are their bans, chat mutes and history.
 - **Game logs, logs.tf links, player actions, chat and the activity log** come along too.
-- **Admin panel settings**: only the incoming instance's default player skill and whitelist carry over, as its gamemode's settings. Everything else is the primary's.
+- **Admin panel settings**: only the incoming instance's default player skill carries over, as its gamemode's setting. If the incoming instance's global whitelist differs from the primary's, its queues without a whitelist of their own get it as their queue whitelist. Everything else is the primary's.
 
 What does **not** come over:
 
@@ -111,7 +111,7 @@ The output looks like this:
 [merge] (dry run) logstf.logs: 2660 incoming
 [merge] (dry run) activitylog: 3005 incoming
 [merge] (dry run) players: 529 merged, 710 added
-[merge] (dry run) configuration: games.default_player_skill, games.gamemode_whitelist_ids
+[merge] (dry run) configuration: games.default_player_skill
 [merge] (dry run) no changes made
 ```
 
@@ -264,7 +264,7 @@ sm_tf2pickuporg_api_address "https://tf2pickup.eu"
 
 ### Discord invite link
 
-The Discord invite link is no longer part of the website branding. After upgrading, go to the **Admin panel → Miscellaneous** section and fill in your Discord invite link there.
+The Discord invite link is no longer part of the website branding. After upgrading, go to the **Admin panel → Discord** section and fill in your Discord invite link there.
 
 ---
 
