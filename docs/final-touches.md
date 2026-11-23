@@ -4,7 +4,7 @@ title: Final touches
 
 ## Adding site rules
 
-You definitely want to define what things are allowed and what not, and because of that you should define site rules. You can do so through the Admin Panel. All instructions here are written in Markdown (based on [Marked.js](https://marked.js.org/)). Edits should be done on left side of the page, right one shows up a rule page preview.
+You definitely want to define what things are allowed and what not, and because of that you should define site rules. You can do so through the Admin Panel. Go to **Admin panel → Rules & privacy policy**. The rules are written in Markdown (based on [Marked.js](https://marked.js.org/)) and shown to players as written.
 
 :::caution
 We discourage you from using inline HTML formatting, since it's buggy.
@@ -18,7 +18,7 @@ After setting up the rules, they will show up in a popup for every user joining 
 
 ## Reviewing the privacy policy
 
-Please take a look at the privacy policy document; it is accessible for the users using a link at the bottom of the webpage and can be edited via the admin panel. The only thing you need to change is the link to your website, as by default it is set to [tf2pickup.pl](https://tf2pickup.pl):
+Please take a look at the privacy policy document; it is accessible for the users using a link at the bottom of the webpage and can be edited in the **Privacy policy** tab of **Admin panel → Rules & privacy policy**. The only thing you need to change is the link to your website, as by default it is set to [tf2pickup.pl](https://tf2pickup.pl):
 
 ![edit-privacy-policy](/img/content/final-touches/edit-privacy-policy.png)
 

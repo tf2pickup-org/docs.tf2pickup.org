@@ -113,7 +113,7 @@ When you hover over a player's name in a queue slot, a tooltip shows their skill
 
 Default player skill values are configured in **Admin panel → Skill**. Set the values for each class of each gamemode, and save. Only gamemodes that one of your queues uses and that balance teams by skill (6v6 and 9v9) are listed; bball and ultiduo teams are random, so they have no skill.
 
-![player-restrictions](/img/content/website-settings/player-restrictions.png)
+![skill](/img/content/website-settings/skill.png)
 
 ### Reviewing skill values
 
