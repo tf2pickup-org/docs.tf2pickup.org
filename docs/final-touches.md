@@ -56,13 +56,14 @@ If you have any static servers, they will show up on the list.
 serveme.tf servers are being used in pickup games **only** if no static game servers are assigned to the site.
 :::
 
-Provided you have a valid serveme.tf API key set in your `.env` file, _serveme.tf integration settings_ becomes available:
+Provided you have a valid serveme.tf API key set in your `.env` file, the **serveme.tf** section of **Admin panel → Game servers** becomes available:
 
 ![configure-serveme-integration](/img/content/final-touches/configure-serveme-integration.png)
 
 Here you can configure:
 
 - **Preferred region** — pick the region closest to your players. If a server from the preferred region is not available, another one will be used instead.
+- **Preferred server** — the name of a server to always pick when it is available.
 - **Banned game server name patterns** — exclude servers whose names contain any of the listed patterns from being reserved.
 
 ### tf2-quick-server integration
@@ -77,7 +78,7 @@ TF2_QUICK_SERVER_CLIENT_ID=your_client_id
 TF2_QUICK_SERVER_CLIENT_SECRET=your_client_secret
 ```
 
-Contact the tf2-quick-server team to obtain credentials. Once set, the integration status is shown in **Admin Panel → Game servers**. When reassigning a game server to a game, the server list will include a **TF2 Quick Server** section. You can either select an existing quick server that is already running, or choose **Create new server** and pick the region closest to your players.
+Contact the tf2-quick-server team to obtain credentials. Once set, **Admin Panel → Game servers** shows a **TF2 QuickServer** section, where you pick the region new servers are created in and, under **Advanced**, how long to wait for a new server before giving up. When reassigning a game server to a game, the server list will include a **TF2 Quick Server** section. You can either select an existing quick server that is already running, or choose **Create new server** and pick the region closest to your players.
 
 Available regions: São Paulo, Santiago, Bogotá, Chicago, Frankfurt, Sydney.
 
@@ -89,9 +90,9 @@ tf2-quick-server can be used alongside static servers and serveme.tf. The site u
 
 SourceTV runs on the same machine (and therefore the same IP address) as the game server, so the SourceTV connect string shown to non-participants exposes the game server's address. This can be scraped and abused for DDoS attacks. To mitigate this, **Admin Panel → Game servers** includes a **Hide server info from spectators** setting with three modes:
 
-- **never** — show connect info to everyone (the previous behavior).
-- **auto** *(default)* — hide connect info only for non-serveme.tf servers. serveme.tf has built-in DDoS protection, so reservations there stay visible.
-- **always** — hide connect info for all servers.
+- **Auto** *(default)* — hide connect info only for non-serveme.tf servers. serveme.tf has built-in DDoS protection, so reservations there stay visible.
+- **Always hide** — hide connect info for all servers.
+- **Never hide** — show connect info to everyone (the previous behavior).
 
 When connect info is hidden, non-participants see `hidden` instead of the SourceTV connect string, and the **watch stv** button is removed for them.
 
@@ -116,21 +117,22 @@ After the site start, you may want to add admins in order to make site moderatio
 
 ![run-diagnostics](/img/content/final-touches/player-roles.png)
 
-For setting a whitelist [look there](/docs/website-settings#server-whitelist), map pool settings can be seen [there](/docs/website-settings#map-pool-settings), and [there](/docs/the-most-common-tasks#setting-up-player-skills) you can look at for the skill setup.
+For setting a whitelist [look there](/docs/website-settings#server-whitelist), map pool settings can be seen [there](/docs/website-settings#maps), and [there](/docs/the-most-common-tasks#setting-up-player-skills) you can look at for the skill setup.
 
 ## Set up voice chat settings
 
-These settings can be set by superusers only. There are three options to set it up:
+Go to **Admin panel → Voice server**. There are three options to set it up:
 
 ![voice-chat-settings](/img/content/final-touches/voice-chat-settings.png)
 
 - **Disabled** - disables voice connect link entirely on the pickup page,
 - **Static link** - the voice chat button redirects to the address defined in the `Static link` field,
-- **Mumble** - allows for defining Mumble server configuration. There are three values to set:
-  - URL - IP/domain name address of the server
-  - Port - port used by the Mumble server
-  - Password (optional) - password needed to log onto the Mumble server
-  - Channel name - defines the parent channel for the pickups
+- **Mumble** - allows for defining Mumble server configuration:
+  - Server URL - address and port players connect to
+  - Server password (optional) - password needed to log onto the Mumble server
+  - Channel name - game channels are created inside this channel
+  - Verify players automatically - only a game's players can join its channels; they are recognized by their Mumble certificate. When off, who can join is up to the Mumble server's own permissions
+  - Under **Advanced**: Internal server URL (optional, the address the bot uses when it differs from the public one) and Bot username
 
 For more details about Mumble bot setup, check [this](/docs/site-components-deployment#mumble-server-setup).
 

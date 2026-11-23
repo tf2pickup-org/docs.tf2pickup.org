@@ -14,7 +14,7 @@ Clicking it will ask for confirmation before proceeding. Once confirmed, all pla
 
 ## Scramble maps
 
-You may want to scramble the maps if one of the maps is played too often. You can do so by picking the queue's tab and clicking this button in the Admin panel:
+You may want to scramble the maps if one of the maps is played too often. Go to **Admin panel → Queues**, open the queue, pick the **Maps** tab and click **Scramble**:
 
 ![scramble-maps](/img/content/common-tasks/scramble-maps.png)
 
@@ -86,7 +86,7 @@ If you won't assign skill for a player - they will get skill values defined in a
 
 When an admin views a player's profile, a skill editing toolbox is displayed directly on the page. It shows input fields for each game class, a win-loss chart, and a save button.
 
-If [player verification](/docs/website-settings#configuring-player-restrictions) is enabled, the toolbox also shows a **Player verified** checkbox. Checking it allows the player to join the queue; unchecking it revokes that permission immediately.
+If [player verification](/docs/website-settings#player-verification) is enabled, the toolbox also shows a **Player verified** checkbox. Checking it allows the player to join the queue; unchecking it revokes that permission immediately.
 
 ![set-skills-for-a-player](/img/content/common-tasks/set-skills-for-a-player.png)
 
@@ -94,7 +94,7 @@ Adjust the values for each class and click `Save`. You can also click `Reset` to
 
 ### Skill suggestions (experimental)
 
-When the **Skill suggestions** option is enabled in [Player Restrictions](/docs/website-settings#configuring-player-restrictions), the admin toolbox shows small arrows next to class skill inputs where a player's in-game performance consistently suggests a miscalibration:
+When the **Skill suggestions** option is enabled on the [Skill page](/docs/website-settings#skill), the admin toolbox shows small arrows next to class skill inputs where a player's in-game performance consistently suggests a miscalibration:
 
 - **↑ arrow** — the player's performance on that class consistently suggests the skill value may be set too low.
 - **↓ arrow** — the player's performance on that class consistently suggests the skill value may be set too high.
@@ -102,7 +102,7 @@ When the **Skill suggestions** option is enabled in [Player Restrictions](/docs/
 Suggestions require at least 10 games on the class to appear. After you manually adjust a player's skill, suggestions for that class are silenced for 3 games to give the change time to take effect.
 
 :::note
-This feature is experimental. It can be toggled from the Player Restrictions page in the admin panel.
+This feature is experimental. It can be toggled on the **Admin panel → Skill** page.
 :::
 
 ### Reviewing skills in the queue
@@ -111,13 +111,13 @@ When you hover over a player's name in a queue slot, a tooltip shows their skill
 
 ### Defining default skill values
 
-Default player skill values are configured in the admin panel under `Player restrictions`. Scroll down to the default skill section, set the values for each class of each gamemode, and save. Only gamemodes that one of your queues uses and that balance teams by skill (6v6 and 9v9) are listed; bball and ultiduo teams are random, so they have no skill.
+Default player skill values are configured in **Admin panel → Skill**. Set the values for each class of each gamemode, and save. Only gamemodes that one of your queues uses and that balance teams by skill (6v6 and 9v9) are listed; bball and ultiduo teams are random, so they have no skill.
 
 ![player-restrictions](/img/content/website-settings/player-restrictions.png)
 
 ### Reviewing skill values
 
-You can export player skills as a CSV file from the admin panel under `Skill import/export`, one gamemode at a time. This lets you review and edit skill values in a spreadsheet application.
+You can export player skills as a CSV file from **Admin panel → Skill → Import and export**, one gamemode at a time. This lets you review and edit skill values in a spreadsheet application.
 
 ![skill-table](/img/content/common-tasks/skill-table.png)
 
